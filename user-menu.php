@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . "/user-profile.php";
+require_once __DIR__ . "/includes/user-profile.php";
 $umdb=neal_profile_db(); $umname=$_SESSION['user_username']??'';
 $um=neal_get_user_profile($umdb,$umname);
 if(!$um){$um=['fullname'=>$_SESSION['user_fullname']??$umname,'username'=>$umname,'personnel_code'=>'','department'=>'','avatar'=>'default'];}
