@@ -3266,3 +3266,7 @@ footer {
         align-items: flex-start;
     }
 }
+
+
+/* Modern Persian typography */
+html, body, button, input, select, textarea { font-family: "Vazirmatn", Tahoma, Arial, sans-serif; }
