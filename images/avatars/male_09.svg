@@ -1,17 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
-<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#EEF1F5"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient></defs>
-<rect width="320" height="320" rx="72" fill="url(#bg)"/>
-<circle cx="258" cy="58" r="28" fill="#FFFFFF" opacity=".55"/>
-<path d="M42 320c10-61 55-91 118-91s108 30 118 91z" fill="#455A64"/>
-
-<rect x="143" y="211" width="34" height="38" rx="14" fill="#B97855"/>
-<ellipse cx="160" cy="151" rx="72" ry="86" fill="#B97855"/>
-<path d="M84 137c2-55 32-92 76-92 45 0 75 35 76 92l-17-25-12-30c-28 19-65 26-111 17l-6 38z" fill="#754C32"/>
-<ellipse cx="132" cy="157" rx="7" ry="9" fill="#2D3A52"/><ellipse cx="188" cy="157" rx="7" ry="9" fill="#2D3A52"/>
-<circle cx="134" cy="155" r="2" fill="#fff"/><circle cx="190" cy="155" r="2" fill="#fff"/>
-<path d="M151 193c6 5 12 5 18 0" fill="none" stroke="#9B5D55" stroke-width="4" stroke-linecap="round"/>
-<path d="M136 177c9 5 17 5 25 0M184 177c-9 5-17 5-25 0" fill="none" stroke="#A56D5F" stroke-width="3" opacity=".45"/>
-<path d="M105 157c-12 18-12 38 0 53M215 157c12 18 12 38 0 53" fill="none" stroke="#6C4D7C" stroke-width="9" stroke-linecap="round"/>
-
-
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff5df"/><stop offset="1" stop-color="#fff"/></linearGradient></defs><rect width="160" height="160" rx="30" fill="url(#bg)"/><circle cx="80" cy="70" r="49" fill="#fff" opacity=".42"/><path d="M29 151c5-27 24-42 51-42s46 15 51 42" fill="#7a3e1d"/><path d="M68 108h24v18H68z" fill="#a96d4d"/><ellipse cx="80" cy="67" rx="28" ry="34" fill="#a96d4d"/><path d="M50 56c0-25 12-39 31-39 21 0 33 14 30 39-8-7-15-11-22-14-10 9-23 13-39 14z" fill="#101820"/><circle cx="70" cy="67" r="2.5" fill="#26323b"/><circle cx="90" cy="67" r="2.5" fill="#26323b"/><path d="M74 86c4 3 8 3 12 0" fill="none" stroke="#805649" stroke-width="2" stroke-linecap="round"/><path d="M68 109l12 16 12-16" fill="none" stroke="#c87900" stroke-width="3"/><circle cx="124" cy="119" r="13" fill="#c87900"/><path d="M118 119h12M124 113v12" stroke="#fff" stroke-width="2" stroke-linecap="round"/><text x="80" y="153" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#52606d">CASUAL</text></svg>
