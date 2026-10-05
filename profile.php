@@ -27,16 +27,14 @@ $av=neal_avatar_url($user['avatar']);
 <?php if($msg): ?><div class="profile-message profile-message-<?php echo ph($type); ?>"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg><?php echo ph($msg); ?></div><?php endif; ?>
 <div class="profile-layout">
 <section class="profile-card profile-card-main">
-<div class="profile-card-heading"><div><h2>انتخاب آواتار</h2><p>یک تصویر را انتخاب کنید؛ هیچ تشخیصی از روی نام انجام نمی‌شود.</p></div><span class="profile-pill">۲۱ انتخاب</span></div>
+<div class="profile-card-heading"><div><h2>انتخاب آواتار</h2><p>تصویر مورد نظر خود را برای حساب کاربری انتخاب کنید.</p></div><span class="profile-pill">۲۱ انتخاب</span></div>
 <div class="profile-current"><div class="profile-current-avatar"><img id="profilePreview" src="<?php echo ph($av); ?>" alt=""><span class="profile-avatar-status"></span></div><div class="profile-current-info"><strong><?php echo ph($user['fullname']); ?></strong><span>@<?php echo ph($user['username']); ?></span><small>روی آواتار مورد علاقه کلیک کنید و سپس ذخیره را بزنید.</small></div></div>
 <form method="post" id="avatarForm"><input type="hidden" name="avatar" id="selectedAvatar" value="<?php echo ph($user['avatar']); ?>">
-<?php foreach([['title'=>'آواتارهای حرفه‌ای','from'=>1,'to'=>5],['title'=>'آواتارهای شاد و جیگیلی','from'=>6,'to'=>10]] as $grp): ?>
-<div class="avatar-group"><div class="avatar-group-title"><span class="avatar-group-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><?php echo $grp['title']; ?><small>۱۰ طرح</small></div><div class="avatar-grid">
-<?php foreach(['male','female'] as $g) for($i=$grp['from'];$i<=$grp['to'];$i++): $id=$g.'_'.str_pad((string)$i,2,'0',STR_PAD_LEFT); ?>
+<div class="avatar-group"><div class="avatar-group-title"><span class="avatar-group-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>تصویرهای پروفایل<small>۲۰ انتخاب</small></div><div class="avatar-grid">
+<?php foreach(['male','female'] as $g) for($i=1;$i<=10;$i++): $id=$g.'_'.str_pad((string)$i,2,'0',STR_PAD_LEFT); ?>
 <button type="button" class="avatar-option <?php echo $user['avatar']===$id?'is-selected':''; ?>" data-avatar="<?php echo $id; ?>"><img src="<?php echo ph(neal_avatar_url($id)); ?>" alt=""><span class="avatar-check"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span></button>
 <?php endfor; ?></div></div>
-<?php endforeach; ?>
-<div class="avatar-default-row"><button type="button" class="avatar-default-option <?php echo $user['avatar']==='default'?'is-selected':''; ?>" data-avatar="default"><img src="images/avatars/default.svg" alt=""><span>آواتار خنثی<small>پیش‌فرض</small></span><span class="avatar-check"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span></button></div>
+<div class="avatar-default-row"><button type="button" class="avatar-default-option <?php echo $user['avatar']==='default'?'is-selected':''; ?>" data-avatar="default"><img src="images/avatars/default.svg" alt=""><span>تصویر پیش‌فرض<small>خنثی</small></span><span class="avatar-check"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span></button></div>
 <div class="profile-save-row"><div class="profile-selection-note">تغییرات پس از ذخیره اعمال می‌شود.</div><button class="profile-save-button" type="submit"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-6H7v6"/></svg>ذخیره آواتار</button></div>
 </form></section>
 <aside class="profile-side-column">
