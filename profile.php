@@ -83,7 +83,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
                         $msg='ابعاد تصویر برای آواتار بسیار کوچک است.';
                         $type='error';
                     } else {
-                        $dir=__DIR__.'/images/uploads/avatars';
+                        $dir=__DIR__.'/images/avatars';
                         if(!is_dir($dir) && !@mkdir($dir,0750,true)){
                             $msg='پوشه ذخیره تصویر قابل ایجاد نیست.';
                             $type='error';
