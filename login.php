@@ -102,7 +102,7 @@ foreach ($login_messages as &$item) {
 unset($item);
 
 /* ---------------------------------------------------------
-   Announcements: safe empty state until the module exists.
+   Announcements
    --------------------------------------------------------- */
 $announcements = [];
 try {
@@ -125,6 +125,34 @@ try {
     }
 } catch (Throwable $e) {
     $announcements = [];
+}
+
+/* ---------------------------------------------------------
+   Occasions: calendar events, birthdays and company occasions.
+   The table is created automatically when this module is first used.
+   --------------------------------------------------------- */
+$occasions = [];
+try {
+    $db->exec("CREATE TABLE IF NOT EXISTS occasions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        body TEXT NOT NULL DEFAULT '',
+        occasion_type TEXT NOT NULL DEFAULT 'general',
+        event_date TEXT NOT NULL DEFAULT '',
+        is_active INTEGER NOT NULL DEFAULT 1,
+        created_by INTEGER NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )");
+    $stmt = $db->query("
+        SELECT id, title, body, occasion_type, event_date
+        FROM occasions
+        WHERE is_active = 1
+        ORDER BY CASE WHEN event_date = '' THEN 1 ELSE 0 END, event_date ASC, id DESC
+        LIMIT 4
+    ");
+    $occasions = $stmt->fetchAll();
+} catch (Throwable $e) {
+    $occasions = [];
 }
 
 function login_h($value) {
@@ -177,7 +205,7 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 .message-stage{position:relative;min-height:118px}.public-message{display:none;align-items:center;gap:12px;opacity:0;transform:translateY(5px);transition:opacity .35s ease,transform .35s ease}.public-message.active{display:flex;opacity:1;transform:translateY(0)}.message-avatar{width:58px;height:58px;min-width:58px;border-radius:16px;overflow:hidden;background:#f2f4f7;border:1px solid #eaecf0}.message-avatar img{width:100%;height:100%;object-fit:cover}.message-content{min-width:0}.message-content p{margin:0;color:#344054;font-size:11px;line-height:2;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.message-person{display:flex;align-items:center;gap:5px;margin-top:8px;color:#667085;font-size:9px}.message-person strong{color:#344054;font-size:10px}.message-date{color:#98a2b3}
 .message-progress{height:3px;border-radius:99px;background:#edf2f7;overflow:hidden;margin-top:9px}.message-progress span{display:block;height:100%;width:0;background:#5b7fbd;transition:width linear}
 .message-empty{min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#98a2b3;gap:6px}.message-empty svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.message-empty strong{font-size:10px;color:#667085}.message-empty span{font-size:9px}
-.announcement-list{display:flex;flex-direction:column;gap:8px}.announcement-item{padding:10px 11px;border:1px solid #eaecf0;border-radius:10px;background:#fafbfc}.announcement-item strong{display:block;color:#1d2939;font-size:10px}.announcement-item p{margin:4px 0 0;color:#667085;font-size:9px;line-height:1.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.announcement-meta{display:block;margin-top:5px;color:#98a2b3;font-size:8px}.announcement-empty{min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#98a2b3;gap:6px}.announcement-empty svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.announcement-empty strong{font-size:10px;color:#667085}.announcement-empty span{font-size:9px}.announcement-view{display:inline-flex;align-items:center;gap:5px;margin-top:9px;color:#3159a6;text-decoration:none;font-size:9px;font-weight:600}.announcement-view svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.7}
+.announcement-list{display:flex;flex-direction:column;gap:8px}.announcement-item{padding:10px 11px;border:1px solid #eaecf0;border-radius:10px;background:#fafbfc}.announcement-item strong{display:block;color:#1d2939;font-size:10px}.announcement-item p{margin:4px 0 0;color:#667085;font-size:9px;line-height:1.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.announcement-meta{display:block;margin-top:5px;color:#98a2b3;font-size:8px}.announcement-empty{min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#98a2b3;gap:6px}.announcement-empty svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.announcement-empty strong{font-size:10px;color:#667085}.announcement-empty span{font-size:9px}.announcement-view{display:inline-flex;align-items:center;gap:5px;margin-top:9px;color:#3159a6;text-decoration:none;font-size:9px;font-weight:600}.announcement-view svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.7}.occasion-list{display:flex;flex-direction:column;gap:8px}.occasion-item{padding:10px 11px;border:1px solid #eaecf0;border-radius:10px;background:#fafbfc;display:grid;grid-template-columns:34px minmax(0,1fr);gap:9px;align-items:start}.occasion-icon{width:34px;height:34px;border-radius:9px;background:#fff4e5;color:#c47a13;display:flex;align-items:center;justify-content:center}.occasion-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.occasion-item strong{display:block;color:#1d2939;font-size:10px}.occasion-item p{margin:4px 0 0;color:#667085;font-size:9px;line-height:1.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.occasion-meta{display:block;margin-top:5px;color:#98a2b3;font-size:8px}.occasion-empty{min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#98a2b3;gap:6px}.occasion-empty svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.occasion-empty strong{font-size:10px;color:#667085}.occasion-empty span{font-size:9px}
 .error,.timeout{padding:10px 12px;border-radius:9px;margin-bottom:14px;font-size:10px;line-height:1.8}.error{background:#fef3f2;color:#b42318;border:1px solid #fecdca}.timeout{background:#fff7e6;color:#b54708;border:1px solid #fedf89;text-align:center}
 .footer{text-align:center;margin-top:17px;color:#98a2b3;font-size:9px}
 @media(max-width:800px){body{padding:20px 13px}.login-main{grid-template-columns:1fr}.login-column{gap:14px}.brand-logo img{height:68px}.header h1{font-size:22px}.login-card{padding:19px}}
@@ -290,6 +318,35 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 <?php endif; ?>
 </div>
 
+<div class="login-card info-card">
+<div class="info-head">
+<div class="info-title">
+<div class="info-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7v5l3 2"/><path d="M16 3h5v5"/></svg></div>
+<div><strong>مناسبت‌ها</strong><small>تولدها و مناسبت‌های NEAL Pharmed</small></div>
+</div>
+<span class="info-count"><?php echo count($occasions); ?> مورد</span>
+</div>
+
+<?php if($occasions): ?>
+<div class="occasion-list">
+<?php foreach($occasions as $occasion): ?>
+<div class="occasion-item">
+<div class="occasion-icon"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/><path d="M12 7v5l3 2"/></svg></div>
+<div>
+<strong><?php echo login_h($occasion['title']); ?></strong>
+<?php if(trim($occasion['body'])!==''): ?><p><?php echo login_h($occasion['body']); ?></p><?php endif; ?>
+<?php if(trim($occasion['event_date'])!==''): ?><span class="occasion-meta"><?php echo login_h($occasion['event_date']); ?></span><?php endif; ?>
+</div>
+</div>
+<?php endforeach; ?>
+</div>
+<?php else: ?>
+<div class="occasion-empty">
+<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7v5l3 2"/></svg>
+<strong>مناسبتی برای نمایش وجود ندارد.</strong>
+<span>تولدها و مناسبت‌های شرکت در این بخش نمایش داده می‌شوند.</span>
+</div>
+<?php endif; ?>
 </div>
 </div>
 
