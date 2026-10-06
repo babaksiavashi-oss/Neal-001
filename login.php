@@ -400,5 +400,21 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 })();
 </script>
 <?php endif; ?>
+<script>
+(function(){
+    function equalizeLoginColumns(){
+        var columns=document.querySelectorAll('.login-column');
+        if(columns.length!==2)return;
+        columns.forEach(function(column){column.style.height='auto';});
+        var maxHeight=Math.max(columns[0].scrollHeight,columns[1].scrollHeight);
+        columns.forEach(function(column){column.style.height=maxHeight+'px';});
+    }
+    window.addEventListener('load',equalizeLoginColumns);
+    window.addEventListener('resize',function(){
+        clearTimeout(window.__nealLoginResizeTimer);
+        window.__nealLoginResizeTimer=setTimeout(equalizeLoginColumns,120);
+    });
+})();
+</script>
 </body>
 </html>
