@@ -193,7 +193,7 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 .brand-logo{text-align:center;margin-bottom:10px}.brand-logo img{height:76px;width:auto;max-width:180px;object-fit:contain}
 .header{text-align:center;margin-bottom:22px}.header h1{margin:0 0 5px;font-size:25px;color:#17365d}.header p{margin:0;color:#667085;font-size:11px}
 .login-main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:stretch}
-.login-column{display:flex;flex-direction:column;gap:18px}
+.login-column{display:flex;flex-direction:column;gap:18px}.login-column:last-child .info-card{flex:1}
 .login-card{background:rgba(255,255,255,.96);border:1px solid #e4e7ec;border-radius:18px;padding:22px;box-shadow:0 10px 28px rgba(16,24,40,.06);position:relative;overflow:hidden}
 .login-card:before{content:"";position:absolute;top:0;right:0;left:0;height:3px;background:#dfe7f1}.user-card:before{background:#3b82f6}
 .card-title{display:flex;align-items:center;gap:11px;margin-bottom:7px}.card-icon{width:42px;height:42px;min-width:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#eef4ff;color:#17365d}.card-icon svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
