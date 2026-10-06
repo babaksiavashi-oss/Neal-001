@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($username === "" || $password === "") {
         $error = "نام کاربری و رمز عبور را وارد کنید.";
     } elseif ($login_type === "admin") {
-        $stmt = $db->prepare("SELECT * FROM admins WHERE username = ? LIMIT 1");
+        $stmt = $db->prepare("SELECT * FROM admins WHERE username = ? AND is_active = 1 LIMIT 1");
         $stmt->execute([$username]);
         $admin = $stmt->fetch();
 
