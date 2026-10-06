@@ -64,7 +64,7 @@ function neal_avatar_url($avatar) {
 function neal_delete_custom_avatar($avatar) {
     $filename = neal_custom_avatar_filename($avatar);
     if (!$filename) return;
-    $path = __DIR__ . '/../images/uploads/avatars/' . $filename;
+    $path = __DIR__ . '/../images/avatars/' . $filename;
     if (is_file($path)) @unlink($path);
 }
 
