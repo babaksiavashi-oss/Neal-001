@@ -55,7 +55,7 @@ function neal_custom_avatar_filename($avatar) {
 
 function neal_avatar_url($avatar) {
     if (neal_is_custom_avatar($avatar)) {
-        return 'images/uploads/avatars/' . rawurlencode(neal_custom_avatar_filename($avatar));
+        return 'images/avatars/' . rawurlencode(neal_custom_avatar_filename($avatar));
     }
     $allowed = neal_allowed_builtin_avatars();
     return 'images/avatars/'.(in_array($avatar,$allowed,true)?$avatar:'default').'.svg';
