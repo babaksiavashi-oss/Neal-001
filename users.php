@@ -10,6 +10,9 @@ $message = "";
 $message_type = "";
 
 $edit_user = null;
+$edit_admin = null;
+
+/* admin_edit_mode_v1 */
 
 
 /*
@@ -224,14 +227,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'add_admin') {
 
         $username = trim(
-            $_POST['username'] ?? ''
+            $_POST['admin_username'] ?? $_POST['username'] ?? ''
         );
 
-        $password = $_POST['password'] ?? '';
+        $password = $_POST['admin_password'] ?? $_POST['password'] ?? '';
 
-        $confirm_password = $_POST['confirm_password'] ?? '';
+        $confirm_password = $_POST['admin_confirm_password'] ?? $_POST['confirm_password'] ?? '';
 
-        $role = $_POST['role'] ?? 'expert';
+        $role = $_POST['admin_role'] ?? $_POST['role'] ?? 'expert';
 
 
         if (
@@ -306,6 +309,229 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $message_type = 'success';
             }
+        }
+    }
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Edit Admin
+    |--------------------------------------------------------------------------
+    */
+
+    elseif ($action === 'edit_admin') {
+
+        $admin_id = (int)(
+            $_POST['admin_id'] ?? 0
+        );
+
+        $username = trim(
+            $_POST['admin_username'] ?? ''
+        );
+
+        $password = $_POST['admin_password'] ?? '';
+
+        $confirm_password = $_POST['admin_confirm_password'] ?? '';
+
+        $role = $_POST['admin_role'] ?? 'expert';
+
+        $allowed_roles = [
+            'admin',
+            'manager',
+            'expert'
+        ];
+
+        if ($admin_id <= 0) {
+
+            $message = 'مدیر موردنظر معتبر نیست.';
+
+            $message_type = 'error';
+
+        } elseif (
+            $username === '' ||
+            !in_array($role, $allowed_roles, true)
+        ) {
+
+            $message = 'لطفاً اطلاعات مدیر را کامل و صحیح وارد کنید.';
+
+            $message_type = 'error';
+
+        } elseif (
+            $password !== '' &&
+            $password !== $confirm_password
+        ) {
+
+            $message = 'رمز عبور و تکرار آن یکسان نیستند.';
+
+            $message_type = 'error';
+
+        } elseif (
+            $password !== '' &&
+            strlen($password) < 6
+        ) {
+
+            $message = 'رمز عبور باید حداقل ۶ کاراکتر باشد.';
+
+            $message_type = 'error';
+
+        } else {
+
+            $check = $db->prepare(
+                "SELECT id
+                 FROM admins
+                 WHERE username = ?
+                 AND id != ?"
+            );
+
+            $check->execute([
+                $username,
+                $admin_id
+            ]);
+
+            if ($check->fetch()) {
+
+                $message = 'این نام کاربری قبلاً توسط مدیر دیگری استفاده شده است.';
+
+                $message_type = 'error';
+
+            } else {
+
+                if ($password !== '') {
+
+                    $hashed_password = password_hash(
+                        $password,
+                        PASSWORD_DEFAULT
+                    );
+
+                    $update = $db->prepare(
+                        "UPDATE admins
+                         SET
+                            username = ?,
+                            password = ?,
+                            role = ?
+                         WHERE id = ?"
+                    );
+
+                    $update->execute([
+                        $username,
+                        $hashed_password,
+                        $role,
+                        $admin_id
+                    ]);
+
+                } else {
+
+                    $update = $db->prepare(
+                        "UPDATE admins
+                         SET
+                            username = ?,
+                            role = ?
+                         WHERE id = ?"
+                    );
+
+                    $update->execute([
+                        $username,
+                        $role,
+                        $admin_id
+                    ]);
+                }
+
+                $message = 'اطلاعات مدیر با موفقیت ویرایش شد.';
+
+                $message_type = 'success';
+
+                $edit_admin = null;
+            }
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Toggle Admin
+    |--------------------------------------------------------------------------
+    */
+
+    elseif ($action === 'toggle_admin') {
+
+        $admin_id = (int)(
+            $_POST['admin_id'] ?? 0
+        );
+
+        if ($admin_id > 0) {
+
+            $columns = $db->query(
+                "PRAGMA table_info(admins)"
+            )->fetchAll();
+
+            $has_is_active = false;
+
+            foreach ($columns as $column) {
+
+                if ($column['name'] === 'is_active') {
+
+                    $has_is_active = true;
+
+                    break;
+                }
+            }
+
+            if (!$has_is_active) {
+
+                $db->exec(
+                    "ALTER TABLE admins
+                     ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1"
+                );
+            }
+
+            $update = $db->prepare(
+                "UPDATE admins
+                 SET is_active =
+                     CASE
+                         WHEN is_active = 1 THEN 0
+                         ELSE 1
+                     END
+                 WHERE id = ?"
+            );
+
+            $update->execute([
+                $admin_id
+            ]);
+
+            $message = 'وضعیت مدیر با موفقیت تغییر کرد.';
+
+            $message_type = 'success';
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Admin
+    |--------------------------------------------------------------------------
+    */
+
+    elseif ($action === 'delete_admin') {
+
+        $admin_id = (int)(
+            $_POST['admin_id'] ?? 0
+        );
+
+        if ($admin_id > 0) {
+
+            $delete = $db->prepare(
+                "DELETE FROM admins
+                 WHERE id = ?"
+            );
+
+            $delete->execute([
+                $admin_id
+            ]);
+
+            $message = 'حساب مدیر برای همیشه حذف شد.';
+
+            $message_type = 'success';
         }
     }
 
@@ -765,17 +991,110 @@ if (
 }
 
 
+
+/*
+|--------------------------------------------------------------------------
+| Edit Admin - GET
+|--------------------------------------------------------------------------
+*/
+
+if (
+    isset($_GET['edit_admin']) &&
+    (int)$_GET['edit_admin'] > 0
+) {
+
+    $edit_admin_id = (int)$_GET['edit_admin'];
+
+    $columns = $db->query(
+        "PRAGMA table_info(admins)"
+    )->fetchAll();
+
+    $has_is_active = false;
+
+    foreach ($columns as $column) {
+
+        if ($column['name'] === 'is_active') {
+
+            $has_is_active = true;
+
+            break;
+        }
+    }
+
+    if (!$has_is_active) {
+
+        $db->exec(
+            "ALTER TABLE admins
+             ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1"
+        );
+    }
+
+    $stmt = $db->prepare(
+        "SELECT
+            id,
+            username,
+            role,
+            is_active,
+            created_at
+         FROM admins
+         WHERE id = ?"
+    );
+
+    $stmt->execute([
+        $edit_admin_id
+    ]);
+
+    $edit_admin = $stmt->fetch();
+
+    if (!$edit_admin) {
+
+        $message = 'مدیر موردنظر پیدا نشد.';
+
+        $message_type = 'error';
+
+        $edit_admin = null;
+    }
+}
+
+
 /*
 |--------------------------------------------------------------------------
 | Admins
 |--------------------------------------------------------------------------
 */
 
+$admin_columns = $db->query(
+    "PRAGMA table_info(admins)"
+)->fetchAll();
+
+$admin_has_is_active = false;
+
+foreach ($admin_columns as $column) {
+
+    if ($column['name'] === 'is_active') {
+
+        $admin_has_is_active = true;
+
+        break;
+    }
+}
+
+if (!$admin_has_is_active) {
+
+    $db->exec(
+        "ALTER TABLE admins
+         ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1"
+    );
+
+    $admin_has_is_active = true;
+}
+
 $stmt = $db->query(
     "SELECT
         id,
         username,
         role,
+        is_active,
         created_at
      FROM admins
      ORDER BY id DESC"
@@ -792,6 +1111,10 @@ $admins = $stmt->fetchAll();
 
 $users_per_page = 10;
 
+$search = trim(
+    $_GET['search'] ?? ''
+);
+
 $current_page = isset($_GET['page'])
     ? (int)$_GET['page']
     : 1;
@@ -800,9 +1123,43 @@ if ($current_page < 1) {
     $current_page = 1;
 }
 
-$total_users = (int)$db->query(
-    "SELECT COUNT(*) FROM users"
-)->fetchColumn();
+$where_sql = '';
+
+$search_value = '';
+
+if ($search !== '') {
+
+    $where_sql = "
+        WHERE
+            u.username LIKE :search
+            OR u.personnel_code LIKE :search
+            OR u.fullname LIKE :search
+    ";
+
+    $search_value = '%' . $search . '%';
+}
+
+
+$count_sql = "
+    SELECT COUNT(*)
+    FROM users u
+    {$where_sql}
+";
+
+$count_stmt = $db->prepare($count_sql);
+
+if ($search !== '') {
+
+    $count_stmt->bindValue(
+        ':search',
+        $search_value,
+        PDO::PARAM_STR
+    );
+}
+
+$count_stmt->execute();
+
+$total_users = (int)$count_stmt->fetchColumn();
 
 $total_pages = max(
     1,
@@ -831,9 +1188,19 @@ $stmt = $db->prepare(
      FROM users u
      LEFT JOIN departments d
         ON d.code = u.department
+     {$where_sql}
      ORDER BY u.id DESC
      LIMIT :limit OFFSET :offset"
 );
+
+if ($search !== '') {
+
+    $stmt->bindValue(
+        ':search',
+        $search_value,
+        PDO::PARAM_STR
+    );
+}
 
 $stmt->bindValue(
     ':limit',
@@ -915,7 +1282,7 @@ require_once "includes/header.php";
 
 
     <!-- =====================================================
-         افزودن مدیر
+         افزودن / ویرایش مدیر
     ====================================================== -->
 
     <div class="card">
@@ -923,11 +1290,17 @@ require_once "includes/header.php";
         <div class="section-title">
 
             <div>
-                <h2>ایجاد مدیر جدید</h2>
+
+                <h2>
+                    <?php echo $edit_admin ? 'ویرایش مدیر' : 'ایجاد مدیر جدید'; ?>
+                </h2>
 
                 <p>
-                    حساب کاربری برای مدیران و کارشناسان سیستم
+                    <?php echo $edit_admin
+                        ? 'اطلاعات حساب مدیریتی را ویرایش کنید.'
+                        : 'حساب کاربری برای مدیران و کارشناسان سیستم'; ?>
                 </p>
+
             </div>
 
         </div>
@@ -938,11 +1311,29 @@ require_once "includes/header.php";
             class="user-form"
         >
 
-            <input
-                type="hidden"
-                name="action"
-                value="add_admin"
-            >
+            <?php if ($edit_admin): ?>
+
+                <input
+                    type="hidden"
+                    name="action"
+                    value="edit_admin"
+                >
+
+                <input
+                    type="hidden"
+                    name="admin_id"
+                    value="<?php echo h($edit_admin['id']); ?>"
+                >
+
+            <?php else: ?>
+
+                <input
+                    type="hidden"
+                    name="action"
+                    value="add_admin"
+                >
+
+            <?php endif; ?>
 
 
             <div class="form-grid">
@@ -956,9 +1347,14 @@ require_once "includes/header.php";
                     <input
                         type="text"
                         id="admin_username"
-                        name="username"
+                        name="admin_username"
                         required
                         autocomplete="off"
+                        value="<?php
+                            echo $edit_admin
+                                ? h($edit_admin['username'])
+                                : '';
+                        ?>"
                     >
 
                 </div>
@@ -972,19 +1368,40 @@ require_once "includes/header.php";
 
                     <select
                         id="admin_role"
-                        name="role"
+                        name="admin_role"
                         required
                     >
 
-                        <option value="expert">
+                        <?php
+                        $selected_admin_role = $edit_admin
+                            ? $edit_admin['role']
+                            : 'expert';
+                        ?>
+
+                        <option
+                            value="expert"
+                            <?php echo $selected_admin_role === 'expert'
+                                ? 'selected'
+                                : ''; ?>
+                        >
                             کارشناس
                         </option>
 
-                        <option value="manager">
+                        <option
+                            value="manager"
+                            <?php echo $selected_admin_role === 'manager'
+                                ? 'selected'
+                                : ''; ?>
+                        >
                             مدیر
                         </option>
 
-                        <option value="admin">
+                        <option
+                            value="admin"
+                            <?php echo $selected_admin_role === 'admin'
+                                ? 'selected'
+                                : ''; ?>
+                        >
                             مدیر سیستم
                         </option>
 
@@ -996,16 +1413,30 @@ require_once "includes/header.php";
                 <div class="form-group">
 
                     <label for="admin_password">
-                        رمز عبور
+
+                        <?php if ($edit_admin): ?>
+
+                            رمز عبور جدید
+
+                            <small>
+                                در صورت عدم تغییر خالی بگذارید
+                            </small>
+
+                        <?php else: ?>
+
+                            رمز عبور
+
+                        <?php endif; ?>
+
                     </label>
 
                     <input
                         type="password"
                         id="admin_password"
-                        name="password"
-                        required
+                        name="admin_password"
                         minlength="6"
                         autocomplete="new-password"
+                        <?php echo $edit_admin ? '' : 'required'; ?>
                     >
 
                 </div>
@@ -1014,16 +1445,26 @@ require_once "includes/header.php";
                 <div class="form-group">
 
                     <label for="admin_confirm_password">
-                        تکرار رمز عبور
+
+                        <?php if ($edit_admin): ?>
+
+                            تکرار رمز عبور جدید
+
+                        <?php else: ?>
+
+                            تکرار رمز عبور
+
+                        <?php endif; ?>
+
                     </label>
 
                     <input
                         type="password"
                         id="admin_confirm_password"
-                        name="confirm_password"
-                        required
+                        name="admin_confirm_password"
                         minlength="6"
                         autocomplete="new-password"
+                        <?php echo $edit_admin ? '' : 'required'; ?>
                     >
 
                 </div>
@@ -1033,12 +1474,32 @@ require_once "includes/header.php";
 
             <div class="form-actions">
 
-                <button
-                    type="submit"
-                    class="btn-primary"
-                >
-                    ایجاد مدیر
-                </button>
+                <?php if ($edit_admin): ?>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        ذخیره تغییرات
+                    </button>
+
+                    <a
+                        href="/neal/users.php"
+                        class="btn-secondary"
+                    >
+                        انصراف
+                    </a>
+
+                <?php else: ?>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        ایجاد مدیر
+                    </button>
+
+                <?php endif; ?>
 
             </div>
 
@@ -1094,6 +1555,10 @@ require_once "includes/header.php";
                             تاریخ ایجاد
                         </th>
 
+                        <th class="actions-header">
+                            عملیات
+                        </th>
+
                     </tr>
 
                 </thead>
@@ -1106,7 +1571,7 @@ require_once "includes/header.php";
                     <tr>
 
                         <td
-                            colspan="4"
+                            colspan="5"
                             class="empty-cell"
                         >
                             هنوز مدیر یا کارشناس مدیریتی ثبت نشده است.
@@ -1155,6 +1620,153 @@ require_once "includes/header.php";
                                     )
                                 );
                                 ?>
+
+                            </td>
+
+
+                            <td class="actions-cell">
+
+                                <div class="action-buttons">
+
+
+                                    <a
+                                        href="/neal/users.php?edit_admin=<?php echo h($admin["id"]); ?>"
+                                        class="icon-action icon-edit"
+                                        title="ویرایش مدیر"
+                                        aria-label="ویرایش مدیر"
+                                    >
+
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            aria-hidden="true"
+                                        >
+
+                                            <path d="M12 20h9"></path>
+
+                                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+
+                                        </svg>
+
+                                    </a>
+
+
+                                    <form
+                                        method="post"
+                                        class="inline-action-form"
+                                    >
+
+                                        <input
+                                            type="hidden"
+                                            name="action"
+                                            value="toggle_admin"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="admin_id"
+                                            value="<?php echo h($admin["id"]); ?>"
+                                        >
+
+                                        <?php if ((int)$admin["is_active"] === 1): ?>
+
+                                            <button
+                                                type="submit"
+                                                class="icon-action icon-disable"
+                                                title="غیرفعال کردن مدیر"
+                                                aria-label="غیرفعال کردن مدیر"
+                                                onclick="return confirm('آیا مطمئن هستید که می‌خواهید این مدیر را غیرفعال کنید؟');"
+                                            >
+
+                                                <svg
+                                                    viewBox="0 0 24 24"
+                                                    aria-hidden="true"
+                                                >
+
+                                                    <path d="M18 8a6 6 0 0 0-12 0v4a6 6 0 0 0 12 0Z"></path>
+
+                                                    <path d="M8 21h8"></path>
+
+                                                    <path d="M12 2v6"></path>
+
+                                                </svg>
+
+                                            </button>
+
+                                        <?php else: ?>
+
+                                            <button
+                                                type="submit"
+                                                class="icon-action icon-enable"
+                                                title="فعال کردن مدیر"
+                                                aria-label="فعال کردن مدیر"
+                                                onclick="return confirm('آیا می‌خواهید این مدیر دوباره فعال شود؟');"
+                                            >
+
+                                                <svg
+                                                    viewBox="0 0 24 24"
+                                                    aria-hidden="true"
+                                                >
+
+                                                    <path d="M12 2v10"></path>
+
+                                                    <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+
+                                                </svg>
+
+                                            </button>
+
+                                        <?php endif; ?>
+
+                                    </form>
+
+
+                                    <form
+                                        method="post"
+                                        class="inline-action-form"
+                                        onsubmit="return confirm('⚠️ آیا مطمئن هستید که می‌خواهید این مدیر را برای همیشه حذف کنید؟');"
+                                    >
+
+                                        <input
+                                            type="hidden"
+                                            name="action"
+                                            value="delete_admin"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="admin_id"
+                                            value="<?php echo h($admin["id"]); ?>"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="icon-action icon-delete"
+                                            title="حذف دائمی مدیر"
+                                            aria-label="حذف دائمی مدیر"
+                                        >
+
+                                            <svg
+                                                viewBox="0 0 24 24"
+                                                aria-hidden="true"
+                                            >
+
+                                                <path d="M3 6h18"></path>
+
+                                                <path d="M8 6V4h8v2"></path>
+
+                                                <path d="M19 6l-1 14H6L5 6"></path>
+
+                                                <path d="M10 11v5"></path>
+
+                                                <path d="M14 11v5"></path>
+
+                                            </svg>
+
+                                        </button>
+
+                                    </form>
+
+                                </div>
 
                             </td>
 
@@ -1494,6 +2106,67 @@ require_once "includes/header.php";
         </div>
 
 
+        <form
+            method="get"
+            class="users-search-form"
+        >
+
+            <div class="users-search-box">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="m20 20-4-4"></path>
+                </svg>
+
+                <input
+                    type="search"
+                    name="search"
+                    value="<?php echo h($search); ?>"
+                    placeholder="جستجو بر اساس نام کاربری، کد پرسنلی یا نام و نام خانوادگی..."
+                    aria-label="جستجوی کاربران"
+                >
+
+                <?php if ($search !== ''): ?>
+
+                    <a
+                        href="/neal/users.php"
+                        class="users-search-clear"
+                        title="پاک کردن جستجو"
+                        aria-label="پاک کردن جستجو"
+                    >
+                        ×
+                    </a>
+
+                <?php endif; ?>
+
+                <button
+                    type="submit"
+                    class="users-search-button"
+                >
+                    جستجو
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <?php if ($search !== ''): ?>
+
+            <div class="users-search-result">
+                نتیجه جستجو برای:
+                <strong><?php echo h($search); ?></strong>
+                —
+                <?php echo persianNumber($total_users); ?>
+                کاربر
+            </div>
+
+        <?php endif; ?>
+
+
         <div class="users-table-wrapper">
 
             <table class="users-table">
@@ -1554,7 +2227,15 @@ require_once "includes/header.php";
                             class="empty-cell"
                         >
 
-                            هنوز کاربری ثبت نشده است.
+                            <?php if ($search !== ''): ?>
+
+                                کاربری با این عبارت جستجو پیدا نشد.
+
+                            <?php else: ?>
+
+                                هنوز کاربری ثبت نشده است.
+
+                            <?php endif; ?>
 
                         </td>
 
@@ -2366,6 +3047,194 @@ require_once "includes/header.php";
 
 
 /* =========================================================
+   User Search
+========================================================= */
+
+.users-search-form {
+
+    width: 100%;
+
+    margin: -5px 0 16px 0;
+
+}
+
+.users-search-box {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    width: 100%;
+
+    min-height: 46px;
+
+    box-sizing: border-box;
+
+    padding: 4px 6px 4px 14px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e1e7ee;
+
+    border-radius: 10px;
+
+    transition:
+        border-color .18s ease,
+        box-shadow .18s ease,
+        background .18s ease;
+
+}
+
+.users-search-box:focus-within {
+
+    background: #fff;
+
+    border-color: #1769aa;
+
+    box-shadow: 0 0 0 3px rgba(23,105,170,.08);
+
+}
+
+.users-search-box > svg {
+
+    width: 19px;
+
+    height: 19px;
+
+    flex: 0 0 19px;
+
+    fill: none;
+
+    stroke: #64748b;
+
+    stroke-width: 1.8;
+
+    stroke-linecap: round;
+
+    stroke-linejoin: round;
+
+}
+
+.users-search-box input {
+
+    flex: 1;
+
+    min-width: 0;
+
+    height: 36px;
+
+    padding: 0;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    color: #1f2937;
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+}
+
+.users-search-box input::placeholder {
+
+    color: #9ca3af;
+
+}
+
+.users-search-button {
+
+    min-width: 82px;
+
+    height: 36px;
+
+    padding: 0 16px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: #1769aa;
+
+    color: #fff;
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: background .18s ease;
+
+}
+
+.users-search-button:hover {
+
+    background: #12588e;
+
+}
+
+.users-search-clear {
+
+    width: 28px;
+
+    height: 28px;
+
+    flex: 0 0 28px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: #64748b;
+
+    text-decoration: none;
+
+    font-size: 22px;
+
+    line-height: 1;
+
+}
+
+.users-search-clear:hover {
+
+    background: #e5e7eb;
+
+    color: #111827;
+
+}
+
+.users-search-result {
+
+    margin: -4px 0 14px 0;
+
+    color: #6b7280;
+
+    font-size: 12px;
+
+}
+
+.users-search-result strong {
+
+    color: #1769aa;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
    Tables
 ========================================================= */
 
@@ -2906,6 +3775,20 @@ require_once "includes/header.php";
 }
 
 @media (max-width: 700px) {
+
+    .users-search-box {
+
+        padding-left: 10px;
+
+    }
+
+    .users-search-button {
+
+        min-width: 68px;
+
+        padding: 0 11px;
+
+    }
 
     .users-page .card {
 
