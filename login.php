@@ -308,7 +308,7 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 </div>
 <?php endforeach; ?>
 </div>
-<a href="/neal/announcements.php" class="announcement-view">مشاهده همه اطلاعیه‌ها <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+<a href="/neal/announcements-list.php" class="announcement-view">مشاهده همه اطلاعیه‌ها <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
 <?php else: ?>
 <div class="announcement-empty">
 <svg viewBox="0 0 24 24"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
