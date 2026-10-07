@@ -267,17 +267,16 @@ $isCustom = neal_is_custom_avatar($user['avatar']);
 <input type="file" name="avatar_file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
 </label>
 <button class="profile-action-button" type="submit">آپلود و فعال‌سازی</button>
-<?php if($isCustom): ?>
-</form>
-<form method="post">
-<input type="hidden" name="csrf" value="<?php echo ph($csrf); ?>">
-<input type="hidden" name="action" value="remove_avatar">
-<button class="profile-action-button danger" type="submit">حذف تصویر اختصاصی</button>
-<?php endif; ?>
-</form>
 <span class="profile-upload-note">تصویر فعلی شما بلافاصله پس از آپلود جایگزین می‌شود.</span>
 </div>
 </form>
+<?php if($isCustom): ?>
+<form method="post" style="margin-top:10px;">
+<input type="hidden" name="csrf" value="<?php echo ph($csrf); ?>">
+<input type="hidden" name="action" value="remove_avatar">
+<button class="profile-action-button danger" type="submit">حذف تصویر اختصاصی</button>
+</form>
+<?php endif; ?>
 </section>
 
 </section>
