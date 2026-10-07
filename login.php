@@ -337,7 +337,7 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 <div>
 <strong><?php echo login_h($occasion['title']); ?></strong>
 <?php if(trim($occasion['body'])!==''): ?><p><?php echo login_h($occasion['body']); ?></p><?php endif; ?>
-<?php if(trim($occasion['event_date'])!==''): ?><span class="occasion-meta"><?php echo login_h(login_jalali_date($occasion['event_date'])); ?></span><?php endif; ?>
+<?php if(trim($occasion['event_date'])!==''): ?><span class="occasion-meta"><?php echo login_h(login_jalali_date($occasion['event_date'])); ?><?php if (strtotime($occasion['event_date'])): ?><?php endif; ?></span><?php endif; ?>
 </div>
 </div>
 <?php endforeach; ?>
