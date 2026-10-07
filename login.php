@@ -1,3 +1,4 @@
+<!-- NEAL login.php validated revision 2026-10-07 -->
 <?php
 require_once __DIR__ . "/config/config.php";
 require_once __DIR__ . "/auth/auth.php";
