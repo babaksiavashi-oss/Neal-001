@@ -217,6 +217,72 @@ if (file_exists($current . "/topsites.html")) {
 }
 
 
+/* =========================
+   Dynamic Dashboard
+   ========================= */
+
+$dashboard_data = [
+    "users" => 0,
+    "active_users" => 0,
+    "pending_messages" => 0,
+    "active_announcements" => 0,
+    "active_occasions" => 0,
+    "open_requests" => 0,
+    "new_requests" => 0,
+    "recent_requests" => []
+];
+
+try {
+    $dashboard_db = new PDO("sqlite:" . __DIR__ . "/data/neal.db");
+    $dashboard_db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $dashboard_db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+    $table_exists = function($table) use ($dashboard_db) {
+        $stmt = $dashboard_db->prepare("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?");
+        $stmt->execute([$table]);
+        return (int)$stmt->fetchColumn() > 0;
+    };
+
+    if ($table_exists("users")) {
+        $dashboard_data["users"] = (int)$dashboard_db->query("SELECT COUNT(*) FROM users")->fetchColumn();
+        $dashboard_data["active_users"] = (int)$dashboard_db->query("SELECT COUNT(*) FROM users WHERE is_active=1")->fetchColumn();
+        $dashboard_data["pending_messages"] = (int)$dashboard_db->query("SELECT COUNT(*) FROM users WHERE TRIM(COALESCE(login_message,''))<>'' AND COALESCE(login_message_status,'pending')='pending'")->fetchColumn();
+    }
+
+    if ($table_exists("announcements")) {
+        $dashboard_data["active_announcements"] = (int)$dashboard_db->query("
+            SELECT COUNT(*) FROM announcements
+            WHERE is_active=1
+              AND (published_at IS NULL OR published_at<=CURRENT_TIMESTAMP)
+              AND (expires_at IS NULL OR expires_at='' OR expires_at>CURRENT_TIMESTAMP)
+        ")->fetchColumn();
+    }
+
+    if ($table_exists("occasions")) {
+        $dashboard_data["active_occasions"] = (int)$dashboard_db->query("SELECT COUNT(*) FROM occasions WHERE is_active=1")->fetchColumn();
+    }
+
+    if ($table_exists("service_requests")) {
+        $dashboard_data["open_requests"] = (int)$dashboard_db->query("
+            SELECT COUNT(*) FROM service_requests
+            WHERE status IN ('new','open','in_progress','pending')
+        ")->fetchColumn();
+
+        $dashboard_data["new_requests"] = (int)$dashboard_db->query("
+            SELECT COUNT(*) FROM service_requests WHERE status='new'
+        ")->fetchColumn();
+
+        $dashboard_data["recent_requests"] = $dashboard_db->query("
+            SELECT tracking_number, fullname, subject, priority, status
+            FROM service_requests
+            ORDER BY id DESC
+            LIMIT 5
+        ")->fetchAll();
+    }
+} catch (Throwable $e) {
+    // Dashboard must remain available even if an optional table is missing.
+}
+
 include "includes/header.php";
 
 ?>
@@ -345,6 +411,66 @@ include "includes/header.php";
 
 </div>
 
+
+<!-- =========================
+     Dynamic Dashboard
+     ========================= -->
+
+<div class="card dashboard-dynamic-card">
+    <div class="section-header">
+        <div>
+            <h2>📌 وضعیت جاری پنل</h2>
+            <span style="display:block;margin-top:6px;color:#667085;font-size:12px;">
+                اطلاعات زنده کاربران، اعلان‌ها و درخواست‌های خدمات
+            </span>
+        </div>
+        <span class="section-badge">Dynamic</span>
+    </div>
+
+    <div class="dashboard-dynamic-grid">
+        <a class="dynamic-stat" href="users.php">
+            <span class="dynamic-stat-icon">👥</span>
+            <span><small>کاربران فعال</small><strong><?php echo number_format($dashboard_data["active_users"]); ?></strong></span>
+        </a>
+        <a class="dynamic-stat" href="login-messages.php">
+            <span class="dynamic-stat-icon">💬</span>
+            <span><small>پیام‌های در انتظار بررسی</small><strong><?php echo number_format($dashboard_data["pending_messages"]); ?></strong></span>
+        </a>
+        <a class="dynamic-stat" href="announcements.php">
+            <span class="dynamic-stat-icon">📢</span>
+            <span><small>اطلاعیه‌های فعال</small><strong><?php echo number_format($dashboard_data["active_announcements"]); ?></strong></span>
+        </a>
+        <a class="dynamic-stat" href="occasions.php">
+            <span class="dynamic-stat-icon">📅</span>
+            <span><small>مناسبت‌های فعال</small><strong><?php echo number_format($dashboard_data["active_occasions"]); ?></strong></span>
+        </a>
+        <a class="dynamic-stat" href="service-requests.php">
+            <span class="dynamic-stat-icon">🎫</span>
+            <span><small>درخواست‌های باز</small><strong><?php echo number_format($dashboard_data["open_requests"]); ?></strong></span>
+        </a>
+        <a class="dynamic-stat" href="service-requests.php">
+            <span class="dynamic-stat-icon">🆕</span>
+            <span><small>درخواست جدید</small><strong><?php echo number_format($dashboard_data["new_requests"]); ?></strong></span>
+        </a>
+    </div>
+
+    <?php if (!empty($dashboard_data["recent_requests"])): ?>
+    <div class="dashboard-recent-requests">
+        <div class="dashboard-subtitle">آخرین درخواست‌های خدمات</div>
+        <?php foreach ($dashboard_data["recent_requests"] as $request): ?>
+        <div class="dashboard-request-row">
+            <div>
+                <strong><?php echo htmlspecialchars($request["tracking_number"] ?? "—", ENT_QUOTES, "UTF-8"); ?></strong>
+                <span><?php echo htmlspecialchars($request["fullname"] ?? "—", ENT_QUOTES, "UTF-8"); ?> · <?php echo htmlspecialchars($request["subject"] ?? "—", ENT_QUOTES, "UTF-8"); ?></span>
+            </div>
+            <span class="dashboard-request-status status-<?php echo htmlspecialchars($request["status"] ?? "new", ENT_QUOTES, "UTF-8"); ?>">
+                <?php echo htmlspecialchars($request["status"] ?? "—", ENT_QUOTES, "UTF-8"); ?>
+            </span>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+</div>
 
 <!-- =========================
      Live Proxy Status
@@ -1948,6 +2074,8 @@ if ($latest != "" && file_exists($current . "/topsites.html")) {
 
 }
 
+
+.dashboard-dynamic-card{margin-top:24px}.dashboard-dynamic-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:18px}.dynamic-stat{display:flex;align-items:center;gap:10px;padding:13px;border:1px solid #eaecf0;border-radius:12px;background:#fff;text-decoration:none;color:inherit;transition:.18s}.dynamic-stat:hover{transform:translateY(-2px);box-shadow:0 7px 18px rgba(16,24,40,.07);border-color:#d0d5dd}.dynamic-stat-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:#f2f4f7;font-size:18px}.dynamic-stat small{display:block;color:#667085;font-size:9px;line-height:1.5}.dynamic-stat strong{display:block;color:#101828;font-size:17px;margin-top:3px}.dashboard-recent-requests{margin-top:18px;border-top:1px solid #eaecf0;padding-top:15px}.dashboard-subtitle{font-size:12px;font-weight:700;color:#344054;margin-bottom:8px}.dashboard-request-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 4px;border-bottom:1px solid #f2f4f7}.dashboard-request-row:last-child{border-bottom:0}.dashboard-request-row strong{display:block;font-size:11px;color:#101828}.dashboard-request-row div span{display:block;font-size:10px;color:#98a2b3;margin-top:3px}.dashboard-request-status{padding:4px 8px;border-radius:20px;background:#f2f4f7;color:#475467;font-size:9px;white-space:nowrap}.status-new{background:#eef4ff;color:#3159a6}.status-in_progress{background:#fff4cc;color:#9a6700}.status-open{background:#ecfdf3;color:#027a48}.status-pending{background:#fff1f3;color:#c01048}@media(max-width:1100px){.dashboard-dynamic-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:650px){.dashboard-dynamic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-request-row{align-items:flex-start;flex-direction:column}}
 </style>
 
 
