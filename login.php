@@ -410,8 +410,9 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
     setupCarousel('.occasion-slide','occasionProgress');
 })();
 </script>
-<?php endif; ?>
-
+<script>
+(function(){
+    function equalizeLoginColumns(){
         var columns=document.querySelectorAll('.login-column');
         if(columns.length!==2)return;
         columns.forEach(function(column){column.style.height='auto';});
