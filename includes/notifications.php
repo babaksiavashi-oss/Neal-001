@@ -81,15 +81,17 @@ function neal_sync_notifications($db, $username)
      * اطلاعیه‌های منتشرشده شرکت
      */
     try {
-        $rows = $db->query("
+        $stmt = $db->prepare("
             SELECT id, title, body, published_at, created_at
             FROM announcements
             WHERE is_active = 1
-              AND published_at <= '" . $db->quote($now) . "'
-              AND (expires_at IS NULL OR expires_at = '' OR expires_at > '" . $db->quote($now) . "')
+              AND published_at <= ?
+              AND (expires_at IS NULL OR expires_at = '' OR expires_at > ?)
             ORDER BY published_at DESC
             LIMIT 50
         ");
+        $stmt->execute([$now, $now]);
+        $rows = $stmt->fetchAll();
     } catch (Throwable $e) {
         $rows = false;
     }
