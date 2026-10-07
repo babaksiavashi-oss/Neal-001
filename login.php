@@ -205,7 +205,7 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 .message-stage{position:relative;min-height:118px}.public-message{display:none;align-items:center;gap:12px;opacity:0;transform:translateY(5px);transition:opacity .35s ease,transform .35s ease}.public-message.active{display:flex;opacity:1;transform:translateY(0)}.message-avatar{width:58px;height:58px;min-width:58px;border-radius:16px;overflow:hidden;background:#f2f4f7;border:1px solid #eaecf0}.message-avatar img{width:100%;height:100%;object-fit:cover}.message-content{min-width:0}.message-content p{margin:0;color:#344054;font-size:11px;line-height:2;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.message-person{display:flex;align-items:center;gap:5px;margin-top:8px;color:#667085;font-size:9px}.message-person strong{color:#344054;font-size:10px}.message-date{color:#98a2b3}
 .message-progress{height:3px;border-radius:99px;background:#edf2f7;overflow:hidden;margin-top:9px}.message-progress span{display:block;height:100%;width:0;background:#5b7fbd;transition:width linear}
 .message-empty{min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#98a2b3;gap:6px}.message-empty svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.message-empty strong{font-size:10px;color:#667085}.message-empty span{font-size:9px}
-.announcement-list{display:flex;flex-direction:column;gap:8px}.announcement-item{padding:10px 11px;border:1px solid #eaecf0;border-radius:10px;background:#fafbfc}.announcement-item strong{display:block;color:#1d2939;font-size:10px}.announcement-item p{margin:4px 0 0;color:#667085;font-size:9px;line-height:1.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.announcement-meta{display:block;margin-top:5px;color:#98a2b3;font-size:8px}.announcement-empty{min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#98a2b3;gap:6px}.announcement-empty svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.announcement-empty strong{font-size:10px;color:#667085}.announcement-empty span{font-size:9px}.announcement-view{display:inline-flex;align-items:center;gap:5px;margin-top:9px;color:#3159a6;text-decoration:none;font-size:9px;font-weight:600}.announcement-view svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.7}.occasion-list{display:flex;flex-direction:column;gap:8px}.occasion-item{padding:10px 11px;border:1px solid #eaecf0;border-radius:10px;background:#fafbfc;display:grid;grid-template-columns:34px minmax(0,1fr);gap:9px;align-items:start}.occasion-icon{width:34px;height:34px;border-radius:9px;background:#fff4e5;color:#c47a13;display:flex;align-items:center;justify-content:center}.occasion-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.occasion-item strong{display:block;color:#1d2939;font-size:10px}.occasion-item p{margin:4px 0 0;color:#667085;font-size:9px;line-height:1.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.occasion-meta{display:block;margin-top:5px;color:#98a2b3;font-size:8px}.occasion-empty{min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#98a2b3;gap:6px}.occasion-empty svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.occasion-empty strong{font-size:10px;color:#667085}.occasion-empty span{font-size:9px}
+.announcement-stage,.occasion-stage{position:relative;min-height:118px}.announcement-slide,.occasion-slide{display:none;opacity:0;transform:translateY(5px);transition:opacity .35s ease,transform .35s ease}.announcement-slide.active,.occasion-slide.active{display:flex;opacity:1;transform:translateY(0)}.announcement-stage .announcement-item{display:none}.announcement-stage .announcement-item.active{display:block}.announcement-progress,.occasion-progress{height:3px;border-radius:99px;background:#edf2f7;overflow:hidden;margin-top:9px}.announcement-progress span,.occasion-progress span{display:block;height:100%;width:0;background:#5b7fbd;transition:width linear}.announcement-item{padding:10px 11px;border:1px solid #eaecf0;border-radius:10px;background:#fafbfc}.announcement-item strong{display:block;color:#1d2939;font-size:10px}.announcement-item p{margin:4px 0 0;color:#667085;font-size:9px;line-height:1.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.announcement-meta{display:block;margin-top:5px;color:#98a2b3;font-size:8px}.announcement-empty{min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#98a2b3;gap:6px}.announcement-empty svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.announcement-empty strong{font-size:10px;color:#667085}.announcement-empty span{font-size:9px}.announcement-view{display:inline-flex;align-items:center;gap:5px;margin-top:9px;color:#3159a6;text-decoration:none;font-size:9px;font-weight:600}.announcement-view svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.7}.occasion-item{padding:10px 11px;border:1px solid #eaecf0;border-radius:10px;background:#fafbfc;display:grid;grid-template-columns:34px minmax(0,1fr);gap:9px;align-items:start}.occasion-icon{width:34px;height:34px;border-radius:9px;background:#fff4e5;color:#c47a13;display:flex;align-items:center;justify-content:center}.occasion-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.occasion-item strong{display:block;color:#1d2939;font-size:10px}.occasion-item p{margin:4px 0 0;color:#667085;font-size:9px;line-height:1.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.occasion-meta{display:block;margin-top:5px;color:#98a2b3;font-size:8px}.occasion-empty{min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#98a2b3;gap:6px}.occasion-empty svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.occasion-empty strong{font-size:10px;color:#667085}.occasion-empty span{font-size:9px}
 .error,.timeout{padding:10px 12px;border-radius:9px;margin-bottom:14px;font-size:10px;line-height:1.8}.error{background:#fef3f2;color:#b42318;border:1px solid #fecdca}.timeout{background:#fff7e6;color:#b54708;border:1px solid #fedf89;text-align:center}
 .footer{text-align:center;margin-top:17px;color:#98a2b3;font-size:9px}
 @media(max-width:800px){body{padding:20px 13px}.login-main{grid-template-columns:1fr}.login-column{gap:14px}.brand-logo img{height:68px}.header h1{font-size:22px}.login-card{padding:19px}}
@@ -296,18 +296,20 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 <div class="info-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div>
 <div><strong>اطلاعیه‌های شرکت</strong><small>آخرین اطلاعیه‌های NEAL Pharmed</small></div>
 </div>
+<span class="info-count"><?php echo count($announcements); ?> اطلاعیه</span>
 </div>
 
 <?php if($announcements): ?>
-<div class="announcement-list">
-<?php foreach($announcements as $announcement): ?>
-<div class="announcement-item">
+<div class="announcement-stage" id="announcementStage">
+<?php foreach($announcements as $index=>$announcement): ?>
+<div class="announcement-item announcement-slide<?php echo $index===0?' active':''; ?>" data-announcement-index="<?php echo $index; ?>">
 <strong><?php echo login_h($announcement['title']); ?></strong>
 <p><?php echo login_h(strip_tags($announcement['body'])); ?></p>
 <span class="announcement-meta"><?php echo login_h(login_jalali_date($announcement['published_at'])); ?></span>
 </div>
 <?php endforeach; ?>
 </div>
+<div class="announcement-progress"><span id="announcementProgress"></span></div>
 <a href="/neal/announcements-list.php" class="announcement-view">مشاهده همه اطلاعیه‌ها <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
 <?php else: ?>
 <div class="announcement-empty">
@@ -328,10 +330,10 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 </div>
 
 <?php if($occasions): ?>
-<div class="occasion-list">
-<?php foreach($occasions as $occasion): ?>
-<div class="occasion-item">
-<div class="occasion-icon"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/><path d="M12 7v5l3 2"/></svg></div>
+<div class="occasion-stage" id="occasionStage">
+<?php foreach($occasions as $index=>$occasion): ?>
+<div class="occasion-item occasion-slide<?php echo $index===0?' active':''; ?>" data-occasion-index="<?php echo $index; ?>">
+<div class="occasion-icon"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-16 0Z"/><path d="M12 7v5l3 2"/></svg></div>
 <div>
 <strong><?php echo login_h($occasion['title']); ?></strong>
 <?php if(trim($occasion['body'])!==''): ?><p><?php echo login_h($occasion['body']); ?></p><?php endif; ?>
@@ -340,6 +342,7 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 </div>
 <?php endforeach; ?>
 </div>
+<div class="occasion-progress"><span id="occasionProgress"></span></div>
 <?php else: ?>
 <div class="occasion-empty">
 <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7v5l3 2"/></svg>
@@ -353,56 +356,62 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 <div class="footer">NEAL Pharmed Pharmaceutical Company</div>
 </div>
 
-<?php if($login_messages): ?>
 <script>
 (function(){
-    var items=[].slice.call(document.querySelectorAll('.public-message'));
-    var progress=document.getElementById('messageProgress');
-    if(!items.length)return;
-
-    var order=items.map(function(_,i){return i;});
-    var current=-1;
     var duration=60000;
 
-    function shuffle(array){
-        for(var i=array.length-1;i>0;i--){
-            var j=Math.floor(Math.random()*(i+1));
-            var t=array[i];array[i]=array[j];array[j]=t;
-        }
-        return array;
-    }
+    function setupCarousel(selector, progressId){
+        var items=[].slice.call(document.querySelectorAll(selector));
+        var progress=document.getElementById(progressId);
+        if(!items.length)return;
 
-    function next(){
-        if(order.length===0){
-            order=items.map(function(_,i){return i;});
-            shuffle(order);
-            if(order.length>1 && order[0]===current){
-                var t=order[0];order[0]=order[1];order[1]=t;
+        var order=items.map(function(_,i){return i;});
+        var current=-1;
+
+        function shuffle(array){
+            for(var i=array.length-1;i>0;i--){
+                var j=Math.floor(Math.random()*(i+1));
+                var t=array[i];array[i]=array[j];array[j]=t;
+            }
+            return array;
+        }
+
+        function next(){
+            if(order.length===0){
+                order=items.map(function(_,i){return i;});
+                shuffle(order);
+                if(order.length>1 && order[0]===current){
+                    var t=order[0];order[0]=order[1];order[1]=t;
+                }
+            }
+
+            var nextIndex=order.shift();
+            items.forEach(function(item,i){
+                item.classList.toggle('active',i===nextIndex);
+            });
+            current=nextIndex;
+
+            if(progress){
+                progress.style.transition='none';
+                progress.style.width='0%';
+                void progress.offsetWidth;
+                progress.style.transition='width '+duration+'ms linear';
+                progress.style.width='100%';
             }
         }
-        var nextIndex=order.shift();
-        items.forEach(function(item,i){
-            item.classList.toggle('active',i===nextIndex);
-        });
-        current=nextIndex;
-        if(progress){
-            progress.style.transition='none';
-            progress.style.width='0%';
-            void progress.offsetWidth;
-            progress.style.transition='width '+duration+'ms linear';
-            progress.style.width='100%';
-        }
+
+        order=shuffle(order);
+        next();
+        if(items.length>1)setInterval(next,duration);
     }
 
-    order=shuffle(order);
-    next();
-    setInterval(next,duration);
+    setupCarousel('.public-message','messageProgress');
+    setupCarousel('.announcement-slide','announcementProgress');
+    setupCarousel('.occasion-slide','occasionProgress');
 })();
 </script>
 <?php endif; ?>
-<script>
-(function(){
-    function equalizeLoginColumns(){
+
         var columns=document.querySelectorAll('.login-column');
         if(columns.length!==2)return;
         columns.forEach(function(column){column.style.height='auto';});
