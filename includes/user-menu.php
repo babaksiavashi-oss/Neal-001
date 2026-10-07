@@ -1,6 +1,16 @@
 <?php
 require_once __DIR__ . "/user-profile.php";
-require_once __DIR__ . "/notifications.php";
+
+// Notification Center must never be allowed to break the employee portal.
+$um_unread = 0;
+try {
+    require_once __DIR__ . "/notifications.php";
+    $um_notifications_db = neal_notifications_db();
+    neal_sync_notifications($um_notifications_db, $_SESSION['user_username'] ?? '');
+    $um_unread = neal_notification_unread_count($um_notifications_db, $_SESSION['user_username'] ?? '');
+} catch (Throwable $e) {
+    $um_unread = 0;
+}
 $umdb = neal_profile_db();
 $umname = $_SESSION['user_username'] ?? '';
 $um = neal_get_user_profile($umdb, $umname);
@@ -14,10 +24,6 @@ if (!$um) {
     ];
 }
 $umav = neal_avatar_url($um['avatar']);
-$um_notifications_db = neal_notifications_db();
-neal_sync_notifications($um_notifications_db, $umname);
-$um_unread = neal_notification_unread_count($um_notifications_db, $umname);
-
 $umcount = 0;
 try {
     $s = $umdb->prepare("SELECT COUNT(*) FROM service_requests WHERE requester_username=?");
