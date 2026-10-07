@@ -37,7 +37,7 @@ $s=$umdb->prepare("SELECT COUNT(*) FROM service_requests WHERE requester_usernam
 <button type="button">اطلاع‌رسانی⌄</button>
 <div class="neal-user-dropdown">
 <a href="announcements-list.php">📢 اطلاعیه‌های شرکت</a>
-<a href="occasions.php">📅 مناسبت‌ها</a>
+<a href="announcements-list.php">📅 مناسبت‌ها و اطلاعیه‌ها</a>
 </div>
 </div>
 <div class="neal-user-group">
