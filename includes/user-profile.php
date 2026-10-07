@@ -15,6 +15,9 @@ function neal_ensure_profile_columns($db) {
     if (!isset($names['avatar'])) {
         $db->exec("ALTER TABLE users ADD COLUMN avatar TEXT NOT NULL DEFAULT 'default'");
     }
+    if (!isset($names['user_status'])) {
+        $db->exec("ALTER TABLE users ADD COLUMN user_status TEXT NOT NULL DEFAULT ''");
+    }
     if (!isset($names['login_message'])) {
         $db->exec("ALTER TABLE users ADD COLUMN login_message TEXT NOT NULL DEFAULT ''");
     }
@@ -73,6 +76,7 @@ function neal_get_user_profile($db, $username) {
     neal_ensure_profile_columns($db);
     $s=$db->prepare("SELECT id,username,fullname,personnel_code,department,phone,is_active,
         COALESCE(NULLIF(avatar,''),'default') avatar,
+        COALESCE(user_status,'') user_status,
         COALESCE(login_message,'') login_message,
         COALESCE(login_message_status,'none') login_message_status,
         COALESCE(login_message_rejection_reason,'') login_message_rejection_reason,
