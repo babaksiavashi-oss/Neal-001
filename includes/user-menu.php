@@ -1,13 +1,30 @@
 <?php
 require_once __DIR__ . "/user-profile.php";
-$umdb=neal_profile_db(); $umname=$_SESSION['user_username']??'';
-$um=neal_get_user_profile($umdb,$umname);
-if(!$um){$um=['fullname'=>$_SESSION['user_fullname']??$umname,'username'=>$umname,'personnel_code'=>'','department'=>'','avatar'=>'default'];}
-$umav=neal_avatar_url($um['avatar']);
-$s=$umdb->prepare("SELECT COUNT(*) FROM service_requests WHERE requester_username=?");$s->execute([$umname]);$umcount=(int)$s->fetchColumn();
+$umdb = neal_profile_db();
+$umname = $_SESSION['user_username'] ?? '';
+$um = neal_get_user_profile($umdb, $umname);
+if (!$um) {
+    $um = [
+        'fullname' => $_SESSION['user_fullname'] ?? $umname,
+        'username' => $umname,
+        'personnel_code' => '',
+        'department' => '',
+        'avatar' => 'default',
+        'user_status' => ''
+    ];
+}
+$umav = neal_avatar_url($um['avatar']);
+$s = $umdb->prepare("SELECT COUNT(*) FROM service_requests WHERE requester_username=?");
+$s->execute([$umname]);
+$umcount = (int)$s->fetchColumn();
 ?>
 <div class="sidebar user-sidebar">
 <div class="user-sidebar-profile">
+<?php if(!empty($um['user_status'])): ?>
+<div class="user-sidebar-status" title="<?php echo htmlspecialchars($um['user_status'],ENT_QUOTES,'UTF-8'); ?>">
+<span></span><?php echo htmlspecialchars($um['user_status'],ENT_QUOTES,'UTF-8'); ?>
+</div>
+<?php endif; ?>
 <div class="user-sidebar-avatar-wrap"><img src="<?php echo htmlspecialchars($umav,ENT_QUOTES,'UTF-8'); ?>" class="user-sidebar-avatar" alt=""><span class="user-sidebar-online"></span></div>
 <div class="user-sidebar-name"><?php echo htmlspecialchars($um['fullname'],ENT_QUOTES,'UTF-8'); ?></div>
 <div class="user-sidebar-username">@<?php echo htmlspecialchars($um['username'],ENT_QUOTES,'UTF-8'); ?></div>
@@ -26,3 +43,30 @@ $s=$umdb->prepare("SELECT COUNT(*) FROM service_requests WHERE requester_usernam
 <div class="user-sidebar-divider"></div>
 <a href="/neal/logout.php" class="user-sidebar-logout"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3M21 19V5a2 2 0 0 0-2-2h-5"/></svg><span>خروج از حساب</span></a>
 </div>
+
+<style>
+.user-sidebar-status{
+  max-width:210px;
+  margin:0 auto 12px;
+  padding:7px 11px;
+  border-radius:10px;
+  background:#f5f7fa;
+  color:#5f6878;
+  font-size:12px;
+  line-height:1.7;
+  text-align:center;
+  box-sizing:border-box;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.user-sidebar-status span{
+  display:inline-block;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#22a06b;
+  margin-left:6px;
+  vertical-align:middle;
+}
+</style>
