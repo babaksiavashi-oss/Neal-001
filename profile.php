@@ -34,7 +34,21 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     } else {
         $action=$_POST['action']??'';
 
-        if($action==='save_avatar'){
+        if($action==='save_status'){
+            $status=trim((string)($_POST['user_status']??''));
+            if(mb_strlen($status)>120){
+                $msg='وضعیت حداکثر ۱۲۰ کاراکتر باشد.';
+                $type='error';
+            } else {
+                $s=$db->prepare("UPDATE users SET user_status=? WHERE id=?");
+                $s->execute([$status,$user['id']]);
+                $user['user_status']=$status;
+                $msg=$status===''?'وضعیت شما حذف شد.':'وضعیت شما با موفقیت ذخیره شد.';
+                $type='success';
+            }
+        }
+
+        elseif($action==='save_avatar'){
             $a=trim($_POST['avatar']??'');
             if(!in_array($a,$valid,true)){
                 $msg='آواتار انتخاب‌شده معتبر نیست.';
@@ -71,10 +85,13 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
                     $msg='فایل بارگذاری‌شده معتبر نیست.';
                     $type='error';
                 } else {
-                    $finfo=new finfo(FILEINFO_MIME_TYPE);
-                    $mime=$finfo->file($file['tmp_name']);
-                    $mimeMap=['image/jpeg'=>'jpg','image/png'=>'png'];
                     $imageInfo=@getimagesize($file['tmp_name']);
+                    $mimeMap=[];
+                    if($imageInfo && isset($imageInfo[2])){
+                        if($imageInfo[2]===IMAGETYPE_JPEG)$mimeMap=['image/jpeg'=>'jpg'];
+                        elseif($imageInfo[2]===IMAGETYPE_PNG)$mimeMap=['image/png'=>'png'];
+                    }
+                    $mime=$imageInfo['mime']??'';
 
                     if(!isset($mimeMap[$mime]) || !$imageInfo){
                         $msg='فقط تصویر JPG، JPEG یا PNG قابل استفاده است.';
@@ -297,6 +314,24 @@ $messageStatus=$statusLabels[$user['login_message_status']]??$statusLabels['none
 </aside>
 </div>
 
+<section class="profile-card profile-status-card">
+<div class="profile-card-heading">
+<div>
+    <div class="profile-message-title"><span class="profile-message-icon">💬</span><h2>وضعیت من</h2></div>
+    <p>یک وضعیت کوتاه برای نمایش کنار نام و آواتار شما در بالای پورتال بنویسید.</p>
+</div>
+</div>
+<form method="post" class="public-message-form">
+<input type="hidden" name="csrf_token" value="<?php echo ph($csrf); ?>">
+<input type="hidden" name="action" value="save_status">
+<textarea name="user_status" maxlength="120" placeholder="مثلاً: در جلسه هستم · در حال پاسخ‌گویی · امروز با انرژی شروع کردم..."><?php echo ph($user['user_status']); ?></textarea>
+<div class="public-message-footer">
+<div class="public-message-hint"><span>حداکثر ۱۲۰ کاراکتر · این وضعیت بدون تأیید مدیر ذخیره می‌شود.</span></div>
+<button type="submit" class="profile-message-save">ذخیره وضعیت</button>
+</div>
+</form>
+</section>
+
 <section class="profile-card profile-message-card">
 <div class="profile-card-heading">
 <div>
@@ -351,4 +386,7 @@ $messageStatus=$statusLabels[$user['login_message_status']]??$statusLabels['none
 })();
 </script>
 
+<style>
+.profile-status-card{margin-top:20px}.profile-status-card textarea{min-height:86px}
+</style>
 <?php include "includes/footer.php"; ?>
