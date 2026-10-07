@@ -35,9 +35,10 @@ try {
 .neal-user-dropdown a{display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:8px;color:#344054;text-decoration:none;font-size:12px}
 .neal-user-dropdown a:hover{background:#f5f7fa;color:#102a43}
 .neal-user-section{padding:7px 11px 4px;color:#98a2b3;font-size:9px;font-weight:700}
-.neal-user-profile{margin-right:auto;display:flex;align-items:center;gap:9px;padding:4px 7px 4px 4px;border-radius:11px}
+.neal-user-profile{margin-right:auto;display:flex;align-items:center;gap:10px;padding:4px 7px 4px 4px;border-radius:11px}
 .neal-user-profile:hover{background:#f7f8fa}
 .neal-user-profile img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #eef1f5}
+.neal-user-avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0}.neal-user-status{max-width:150px;padding:3px 8px;border-radius:999px;background:#f4f7fb;border:1px solid #e6ebf2;color:#667085;font-size:9px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .neal-user-identity{display:flex;flex-direction:column;align-items:flex-start;min-width:0;max-width:230px}.neal-user-identity strong{font-size:11px;color:#475467;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.neal-user-identity small{font-size:9px;color:#98a2b3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px;margin-top:2px}
 .neal-user-logout{color:#b42318!important}
 @media(max-width:800px){.neal-user-nav{overflow-x:auto;padding:7px 12px}.neal-user-dropdown{position:fixed;right:12px;top:62px}}
@@ -69,7 +70,7 @@ try {
 </div>
 </div>
 <div class="neal-user-profile">
-<img src="<?php echo htmlspecialchars($umav,ENT_QUOTES,'UTF-8'); ?>" alt="">
+<div class="neal-user-avatar-wrap"><?php if(trim($um['user_status']??'')!==''): ?><span class="neal-user-status"><?php echo htmlspecialchars($um['user_status'],ENT_QUOTES,'UTF-8'); ?></span><?php endif; ?><img src="<?php echo htmlspecialchars($umav,ENT_QUOTES,'UTF-8'); ?>" alt=""></div>
 <div class="neal-user-identity"><strong><?php echo htmlspecialchars($um['fullname'],ENT_QUOTES,'UTF-8'); ?></strong><?php if(trim($um['user_status']??'')!==''): ?><small><?php echo htmlspecialchars($um['user_status'],ENT_QUOTES,'UTF-8'); ?></small><?php endif; ?></div>
 </div>
 </nav>
