@@ -1,16 +1,5 @@
 <?php
 require_once __DIR__ . "/user-profile.php";
-
-// Notification Center must never be allowed to break the employee portal.
-$um_unread = 0;
-try {
-    require_once __DIR__ . "/notifications.php";
-    $um_notifications_db = neal_notifications_db();
-    neal_sync_notifications($um_notifications_db, $_SESSION['user_username'] ?? '');
-    $um_unread = neal_notification_unread_count($um_notifications_db, $_SESSION['user_username'] ?? '');
-} catch (Throwable $e) {
-    $um_unread = 0;
-}
 $umdb = neal_profile_db();
 $umname = $_SESSION['user_username'] ?? '';
 $um = neal_get_user_profile($umdb, $umname);
@@ -40,8 +29,6 @@ try {
 .neal-user-brand small{color:#98a2b3;font-size:10px;font-weight:500}
 .neal-user-nav>a,.neal-user-group>button{border:0;background:transparent;text-decoration:none;color:#475467;font:inherit;font-size:13px;padding:9px 12px;border-radius:9px;cursor:pointer;white-space:nowrap;transition:.16s ease}
 .neal-user-nav>a:hover,.neal-user-group:hover>button,.neal-user-group:focus-within>button{background:#f4f6f8;color:#102a43}
-.neal-user-notification{position:relative}
-.neal-user-notification-badge{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;margin-right:4px;border-radius:999px;background:#d92d20;color:#fff;font-size:8px;font-weight:700;vertical-align:middle}
 .neal-user-group{position:relative}
 .neal-user-dropdown{position:absolute;right:0;top:calc(100% + 5px);min-width:230px;background:#fff;border:1px solid #e7e9ee;border-radius:13px;box-shadow:0 16px 36px rgba(16,24,40,.13);padding:7px;opacity:0;visibility:hidden;transform:translateY(-5px);transition:.16s ease}
 .neal-user-group:hover .neal-user-dropdown,.neal-user-group:focus-within .neal-user-dropdown{opacity:1;visibility:visible;transform:translateY(0)}
@@ -58,7 +45,6 @@ try {
 </style>
 <a class="neal-user-brand" href="portal.php">NEAL <small>پورتال کارکنان</small></a>
 <a href="portal.php">خانه</a>
-<a class="neal-user-notification" href="notifications.php">🔔 اعلان‌ها<?php if($um_unread>0): ?><span class="neal-user-notification-badge"><?php echo $um_unread>99?'99+':$um_unread; ?></span><?php endif; ?></a>
 <div class="neal-user-group">
 <button type="button">خدمات⌄</button>
 <div class="neal-user-dropdown">
