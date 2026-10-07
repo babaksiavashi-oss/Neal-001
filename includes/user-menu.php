@@ -38,7 +38,7 @@ try {
 .neal-user-profile{margin-right:auto;display:flex;align-items:center;gap:9px;padding:4px 7px 4px 4px;border-radius:11px}
 .neal-user-profile:hover{background:#f7f8fa}
 .neal-user-profile img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #eef1f5}
-.neal-user-profile span{font-size:11px;color:#475467;white-space:nowrap}
+.neal-user-identity{display:flex;flex-direction:column;align-items:flex-start;min-width:0;max-width:230px}.neal-user-identity strong{font-size:11px;color:#475467;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.neal-user-identity small{font-size:9px;color:#98a2b3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px;margin-top:2px}
 .neal-user-logout{color:#b42318!important}
 @media(max-width:800px){.neal-user-nav{overflow-x:auto;padding:7px 12px}.neal-user-dropdown{position:fixed;right:12px;top:62px}}
 </style>
@@ -70,6 +70,6 @@ try {
 </div>
 <div class="neal-user-profile">
 <img src="<?php echo htmlspecialchars($umav,ENT_QUOTES,'UTF-8'); ?>" alt="">
-<span><?php echo htmlspecialchars($um['fullname'],ENT_QUOTES,'UTF-8'); ?></span>
+<div class="neal-user-identity"><strong><?php echo htmlspecialchars($um['fullname'],ENT_QUOTES,'UTF-8'); ?></strong><?php if(trim($um['user_status']??'')!==''): ?><small><?php echo htmlspecialchars($um['user_status'],ENT_QUOTES,'UTF-8'); ?></small><?php endif; ?></div>
 </div>
 </nav>
