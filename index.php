@@ -170,54 +170,6 @@ if (file_exists($db_file)) {
 
 
 /* =========================
-   Top Sites
-   ========================= */
-
-$top_sites = array();
-
-
-if (file_exists($current . "/topsites.html")) {
-
-    $html = file_get_contents(
-        $current . "/topsites.html"
-    );
-
-
-    preg_match_all(
-        '/<td[^>]*>(.*?)<\/td>/i',
-        $html,
-        $matches
-    );
-
-
-    if (isset($matches[1])) {
-
-        foreach ($matches[1] as $site) {
-
-            $site = trim(
-                strip_tags($site)
-            );
-
-
-            if ($site != "") {
-
-                $top_sites[] = $site;
-
-            }
-
-
-            if (count($top_sites) >= 10) {
-                break;
-            }
-
-        }
-
-    }
-
-}
-
-
-/* =========================
    Dynamic Dashboard
    ========================= */
 
@@ -444,11 +396,11 @@ include "includes/header.php";
             <span class="dynamic-stat-icon">📅</span>
             <span><small>مناسبت‌های فعال</small><strong><?php echo number_format($dashboard_data["active_occasions"]); ?></strong></span>
         </a>
-        <a class="dynamic-stat" href="service-requests.php">
+        <a class="dynamic-stat" href="tickets.php">
             <span class="dynamic-stat-icon">🎫</span>
             <span><small>درخواست‌های باز</small><strong><?php echo number_format($dashboard_data["open_requests"]); ?></strong></span>
         </a>
-        <a class="dynamic-stat" href="service-requests.php">
+        <a class="dynamic-stat" href="tickets.php">
             <span class="dynamic-stat-icon">🆕</span>
             <span><small>درخواست جدید</small><strong><?php echo number_format($dashboard_data["new_requests"]); ?></strong></span>
         </a>
@@ -844,190 +796,104 @@ include "includes/header.php";
 <?php
 
 /* =========================================================
-   TOP USERS
+   SARG Top Users
+   Parse table cells without relying on exact SARG whitespace.
    ========================================================= */
 
 $top_users = array();
 
-if ($latest != "" && file_exists($current . "/index.html")) {
+if ($latest !== "" && is_file($current . "/index.html")) {
+    $user_html = @file_get_contents($current . "/index.html");
 
-    $user_html = file_get_contents($current . "/index.html");
-
-    /*
-     * SARG index.html
-     *
-     * Structure:
-     *
-     * Rank
-     * Report links
-     * Username
-     * Connect
-     * Bytes
-     * %Bytes
-     * Cache In
-     * Cache Out
-     * Elapsed Time
-     * Milliseconds
-     * %Time
-     */
-
-    preg_match_all(
-        '/<tr>\s*
-        <td[^>]*>\s*(\d+)\s*<\/td>
-        \s*
-        <td[^>]*>.*?<\/td>
-        \s*
-        <td[^>]*>\s*
-            <a[^>]*>\s*(.*?)\s*<\/a>
-        \s*<\/td>
-        \s*
-        <td[^>]*>\s*(.*?)\s*<\/td>
-        \s*
-        <td[^>]*>\s*(.*?)\s*<\/td>
-        \s*
-        <td[^>]*>\s*(.*?)\s*<\/td>
-        \s*
-        <td[^>]*>\s*(.*?)\s*<\/td>
-        \s*
-        <td[^>]*>\s*(.*?)\s*<\/td>
-        \s*
-        <td[^>]*>\s*(.*?)\s*<\/td>
-        \s*
-        <td[^>]*>\s*(.*?)\s*<\/td>
-        \s*
-        <td[^>]*>\s*(.*?)\s*<\/td>
-        \s*
-        <\/tr>/isx',
-        $user_html,
-        $user_matches,
-        PREG_SET_ORDER
-    );
-
-
-    if (!empty($user_matches)) {
-
-        foreach ($user_matches as $row) {
-
-            $username = trim(
-                html_entity_decode(
-                    strip_tags($row[2]),
-                    ENT_QUOTES | ENT_HTML5,
-                    'UTF-8'
-                )
-            );
-
-
-            /*
-             * Ignore empty names
-             */
-
-            if ($username === "") {
+    if ($user_html !== false && preg_match_all('/<tr\b[^>]*>(.*?)<\/tr>/is', $user_html, $user_rows)) {
+        foreach ($user_rows[1] as $user_row) {
+            if (!preg_match_all('/<td\b[^>]*>(.*?)<\/td>/is', $user_row, $user_cells)) {
                 continue;
             }
 
-
-            /*
-             * Ignore IP-only entries.
-             * These are clients that are not authenticated users.
-             */
-
-            if (preg_match(
-                '/^(?:\d{1,3}\.){3}\d{1,3}$/',
-                $username
-            )) {
+            $cells = $user_cells[1];
+            if (count($cells) < 5) {
                 continue;
             }
 
+            $rank_text = trim(html_entity_decode(strip_tags($cells[0]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            if (!preg_match('/^\d+$/', $rank_text)) {
+                continue;
+            }
+
+            $name_html = $cells[2] ?? '';
+            if (preg_match('/<a\b[^>]*>(.*?)<\/a>/is', $name_html, $name_match)) {
+                $username = trim(html_entity_decode(strip_tags($name_match[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            } else {
+                $username = trim(html_entity_decode(strip_tags($name_html), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            }
+
+            if ($username === '' || preg_match('/^(?:\d{1,3}\.){3}\d{1,3}$/', $username)) {
+                continue;
+            }
 
             $top_users[] = array(
-
-                "rank" => intval($row[1]),
-
+                "rank" => (int)$rank_text,
                 "username" => $username,
-
-                "connect" => trim(
-                    strip_tags($row[3])
-                ),
-
-                "bytes" => trim(
-                    strip_tags($row[4])
-                ),
-
-                "cache_in" => trim(
-                    strip_tags($row[5])
-                ),
-
-                "cache_out" => trim(
-                    strip_tags($row[6])
-                ),
-
-                "time" => trim(
-                    strip_tags($row[7])
-                ),
-
-                "milliseconds" => trim(
-                    strip_tags($row[8])
-                ),
-
-                "time_percent" => trim(
-                    strip_tags($row[9])
-                )
-
+                "connect" => trim(html_entity_decode(strip_tags($cells[3] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "bytes" => trim(html_entity_decode(strip_tags($cells[4] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "percent_bytes" => trim(html_entity_decode(strip_tags($cells[5] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "cache" => trim(html_entity_decode(strip_tags($cells[6] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "time" => trim(html_entity_decode(strip_tags($cells[7] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "milliseconds" => trim(html_entity_decode(strip_tags($cells[8] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "time_percent" => trim(html_entity_decode(strip_tags($cells[9] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'))
             );
-
-
-            /*
-             * Top 10 authenticated users
-             */
 
             if (count($top_users) >= 10) {
                 break;
             }
-
         }
-
     }
-
 }
 
 /* =========================================================
-   TOP SITES
+   SARG Top Sites
    ========================================================= */
 
 $top_sites = array();
 
-if ($latest != "" && file_exists($current . "/topsites.html")) {
+if ($latest !== "" && is_file($current . "/topsites.html")) {
+    $sites_html = @file_get_contents($current . "/topsites.html");
 
-    $sites_html = file_get_contents(
-        $current . "/topsites.html"
-    );
+    if ($sites_html !== false && preg_match_all('/<tr\b[^>]*>(.*?)<\/tr>/is', $sites_html, $site_rows)) {
+        foreach ($site_rows[1] as $site_row) {
+            if (!preg_match_all('/<td\b[^>]*>(.*?)<\/td>/is', $site_row, $site_cells)) {
+                continue;
+            }
 
-    preg_match_all(
-        '/<tr>\s*<td[^>]*>(\d+)<\/td>\s*<td[^>]*>\s*<a[^>]*>(.*?)<\/a>\s*<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<\/tr>/is',
-        $sites_html,
-        $site_matches,
-        PREG_SET_ORDER
-    );
+            $cells = $site_cells[1];
+            if (count($cells) < 6) {
+                continue;
+            }
 
-    if (!empty($site_matches)) {
+            $rank_text = trim(html_entity_decode(strip_tags($cells[0]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            if (!preg_match('/^\d+$/', $rank_text)) {
+                continue;
+            }
 
-        foreach ($site_matches as $row) {
+            $site_html = $cells[1] ?? '';
+            if (preg_match('/<a\b[^>]*>(.*?)<\/a>/is', $site_html, $site_match)) {
+                $site_name = trim(html_entity_decode(strip_tags($site_match[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            } else {
+                $site_name = trim(html_entity_decode(strip_tags($site_html), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            }
 
-            $site = trim(
-                strip_tags($row[2])
-            );
-
-            if ($site == "") {
+            if ($site_name === '') {
                 continue;
             }
 
             $top_sites[] = array(
-                "rank"    => intval($row[1]),
-                "site"    => $site,
-                "connect" => trim(strip_tags($row[3])),
-                "bytes"   => trim(strip_tags($row[4])),
-                "time"    => trim(strip_tags($row[5])),
-                "users"   => trim(strip_tags($row[6]))
+                "rank" => (int)$rank_text,
+                "site" => $site_name,
+                "connect" => trim(html_entity_decode(strip_tags($cells[2] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "bytes" => trim(html_entity_decode(strip_tags($cells[3] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "time" => trim(html_entity_decode(strip_tags($cells[4] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "users" => trim(html_entity_decode(strip_tags($cells[5] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'))
             );
 
             if (count($top_sites) >= 10) {
