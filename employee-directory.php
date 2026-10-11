@@ -34,8 +34,10 @@ $departmentCount = 0;
 $errorMessage = '';
 
 try {
+    $employeeDirectoryStage = 'active-users-count';
     $totalActive = (int)$db->query("SELECT COUNT(*) FROM users WHERE is_active = 1")->fetchColumn();
 
+    $employeeDirectoryStage = 'department-list';
     $departmentQuery = $db->query("
         SELECT DISTINCT
             u.department AS department_code,
@@ -71,6 +73,7 @@ try {
     }
 
     $whereSql = implode(" AND ", $where);
+    $employeeDirectoryStage = 'filtered-result-count';
     $countStmt = $db->prepare("
         SELECT COUNT(*)
         FROM users u
@@ -104,10 +107,12 @@ try {
         ORDER BY fullname COLLATE NOCASE ASC, u.id ASC
         LIMIT " . (int)$perPage . " OFFSET " . (int)$offset;
 
+    $employeeDirectoryStage = 'paginated-employee-list';
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Throwable $e) {
+    error_log('[Neal employee-directory] stage=' . ($employeeDirectoryStage ?? 'initialization') . '; ' . get_class($e) . ': ' . $e->getMessage() . '; line=' . $e->getLine());
     $errorMessage = 'دریافت فهرست کارکنان انجام نشد. لطفاً اتصال پایگاه داده و ساختار جدول کاربران را بررسی کنید.';
     $resultCount = 0;
     $perPage = 15;
