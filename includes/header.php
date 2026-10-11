@@ -35,9 +35,9 @@
 <div class="portal-body">
 <?php
 if (isset($portal_mode) && $portal_mode === true) {
-    include "user-menu.php";
+    include __DIR__ . "/user-menu.php";
 } else {
-    include "menu.php";
+    include __DIR__ . "/menu.php";
 }
 ?>
 <div class="content">
