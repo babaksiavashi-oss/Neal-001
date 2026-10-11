@@ -33,6 +33,7 @@
 <div class="neal-nav-dropdown">
 <div class="neal-nav-section">تنظیمات و مدیریت</div>
 <a href="users.php">👥 کاربران</a>
+<a href="employee-directory.php">🧑‍🤝‍🧑 دایرکتوری کارکنان</a>
 <a href="settings.php">⚙️ تنظیمات</a>
 <a href="cache.php">⚡ کش</a>
 <a href="backup.php">💾 پشتیبان‌گیری</a>
