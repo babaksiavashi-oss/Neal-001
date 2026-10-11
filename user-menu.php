@@ -19,6 +19,7 @@ $s=$umdb->prepare("SELECT COUNT(*) FROM service_requests WHERE requester_usernam
 </div>
 <nav class="user-sidebar-nav">
 <a href="portal.php"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5 9v11h14V9M9 20v-6h6v6"/></svg><span>خانه</span></a>
+<a href="employee-directory.php"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>دایرکتوری کارکنان</span></a>
 <a href="service-request.php"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg><span>درخواست جدید</span></a>
 <a href="my-tickets.php"><svg viewBox="0 0 24 24"><path d="M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M8 9h8M8 13h6"/></svg><span>درخواست‌های من</span><?php if($umcount>0): ?><b><?php echo $umcount; ?></b><?php endif; ?></a>
 <a href="profile.php"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>پروفایل من</span></a>
