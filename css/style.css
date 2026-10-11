@@ -3786,3 +3786,23 @@ html, body, button, input, select, textarea { font-family: "Vazirmatn", Tahoma, 
     .employee-directory-details{grid-template-columns:1fr 1fr}
     .employee-directory-card-footer{padding:10px 16px}
 }
+
+
+/* Employee directory pagination */
+.employee-directory-pagination{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:22px;padding:16px 18px;border:1px solid #e5ebf2;border-radius:15px;background:#fff}
+.employee-directory-pagination-info{color:#8793a2;font-size:10px}
+.employee-directory-pagination-info strong{color:#344d69;font-weight:800}
+.employee-directory-pagination-controls{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;direction:rtl}
+.employee-directory-page-number,.employee-directory-page-arrow{display:inline-flex;align-items:center;justify-content:center;min-width:35px;height:35px;padding:0 10px;border:1px solid #e2e8f0;border-radius:9px;background:#fff;color:#53657a;font-family:inherit;font-size:11px;font-weight:700;text-decoration:none;transition:background .16s,border-color .16s,color .16s}
+.employee-directory-page-number:hover,.employee-directory-page-arrow:not(.is-disabled):hover{border-color:#b8cde2;background:#f1f6fb;color:#214f7d}
+.employee-directory-page-number.is-current{border-color:#173f68;background:#173f68;color:#fff;box-shadow:0 3px 8px rgba(23,63,104,.16)}
+.employee-directory-page-arrow{gap:5px;min-width:auto}
+.employee-directory-page-arrow.is-disabled{background:#f8fafc;color:#c0c8d2;border-color:#edf0f4}
+.employee-directory-page-ellipsis{display:inline-flex;align-items:center;justify-content:center;width:18px;color:#98a3b2;font-size:13px}
+@media(max-width:520px){
+    .employee-directory-pagination{align-items:stretch;justify-content:center;padding:13px 10px}
+    .employee-directory-pagination-info{width:100%;text-align:center}
+    .employee-directory-pagination-controls{gap:4px}
+    .employee-directory-page-number{min-width:31px;height:32px;padding:0 8px}
+    .employee-directory-page-arrow{height:32px;padding:0 8px}
+}
