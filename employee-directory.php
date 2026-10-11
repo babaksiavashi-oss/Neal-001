@@ -85,8 +85,12 @@ try {
 
     $perPage = 15;
     $totalPages = max(1, (int)ceil($resultCount / $perPage));
-    $currentPage = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT);
-    $currentPage = ($currentPage === false || $currentPage === null) ? 1 : max(1, $currentPage);
+    // Read pagination input directly; filter_input() may be unavailable in this PHP runtime.
+    $pageValue = $_GET['page'] ?? null;
+    $currentPage = (is_scalar($pageValue) && preg_match('/^[0-9]+$/', (string)$pageValue))
+        ? (int)$pageValue
+        : 1;
+    $currentPage = max(1, $currentPage);
     $currentPage = min($currentPage, $totalPages);
     $offset = ($currentPage - 1) * $perPage;
 
