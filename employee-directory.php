@@ -1,5 +1,5 @@
 <?php
-$portal_mode = isset($_SESSION['user_id']) && !isset($_SESSION['admin_id']);
+$portal_mode = false;
 require_once "auth/auth.php";
 
 if (!isset($_SESSION['admin_id']) && !isset($_SESSION['user_id'])) {
@@ -7,6 +7,7 @@ if (!isset($_SESSION['admin_id']) && !isset($_SESSION['user_id'])) {
     exit;
 }
 
+$portal_mode = isset($_SESSION['user_id']) && !isset($_SESSION['admin_id']);
 require_once "includes/user-profile.php";
 
 $page_title = "دایرکتوری کارکنان";
@@ -151,7 +152,6 @@ try {
                     $avatarUrl = neal_avatar_url($employee['avatar']);
                     $phone = trim((string)($employee['phone'] ?? ''));
                     $phoneHref = preg_replace('/[^0-9+]/', '', $phone);
-                    $initial = mb_substr(trim((string)$employee['fullname']), 0, 1, 'UTF-8');
                 ?>
                 <article class="employee-directory-card">
                     <div class="employee-directory-card-top">
