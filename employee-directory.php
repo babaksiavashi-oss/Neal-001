@@ -70,6 +70,23 @@ try {
         $params[] = $selectedDepartment;
     }
 
+    $whereSql = implode(" AND ", $where);
+    $countStmt = $db->prepare("
+        SELECT COUNT(*)
+        FROM users u
+        LEFT JOIN departments d ON d.code = u.department
+        WHERE " . $whereSql
+    );
+    $countStmt->execute($params);
+    $resultCount = (int)$countStmt->fetchColumn();
+
+    $perPage = 15;
+    $totalPages = max(1, (int)ceil($resultCount / $perPage));
+    $currentPage = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT);
+    $currentPage = ($currentPage === false || $currentPage === null) ? 1 : max(1, $currentPage);
+    $currentPage = min($currentPage, $totalPages);
+    $offset = ($currentPage - 1) * $perPage;
+
     $sql = "
         SELECT
             u.id,
@@ -83,18 +100,22 @@ try {
             COALESCE(NULLIF(TRIM(d.name), ''), NULLIF(TRIM(u.department), ''), 'بدون واحد') AS department_name
         FROM users u
         LEFT JOIN departments d ON d.code = u.department
-        WHERE " . implode(" AND ", $where) . "
+        WHERE " . $whereSql . "
         ORDER BY fullname COLLATE NOCASE ASC, u.id ASC
-    ";
+        LIMIT " . (int)$perPage . " OFFSET " . (int)$offset;
 
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Throwable $e) {
     $errorMessage = 'دریافت فهرست کارکنان انجام نشد. لطفاً اتصال پایگاه داده و ساختار جدول کاربران را بررسی کنید.';
+    $resultCount = 0;
+    $perPage = 15;
+    $totalPages = 1;
+    $currentPage = 1;
+    $offset = 0;
 }
 
-$resultCount = count($employees);
 $hasFilters = ($search !== '' || $selectedDepartment !== '');
 $selectedDepartmentName = '';
 if ($selectedDepartment !== '') {
@@ -211,7 +232,7 @@ if ($selectedDepartment !== '') {
     <?php elseif ($resultCount > 0): ?>
         <section class="employee-directory-listing">
             <div class="employee-directory-listing-heading">
-                <div><h2>همکاران ما</h2><p>برای تماس، روی شماره تلفن همکار کلیک کنید.</p></div>
+                <div><h2>همکاران ما</h2><p>اطلاعات همکاران و واحد سازمانی را مشاهده کنید.</p></div>
                 <span class="employee-directory-listing-count"><?php echo number_format($resultCount); ?> نفر</span>
             </div>
             <div class="employee-directory-grid" aria-label="فهرست کارکنان">
@@ -219,7 +240,6 @@ if ($selectedDepartment !== '') {
                     <?php
                     $avatarUrl = neal_avatar_url($employee['avatar']);
                     $phone = trim((string)$employee['phone']);
-                    $phoneHref = preg_replace('/[^0-9+]/', '', $phone);
                     $initial = function_exists('mb_substr') ? mb_substr((string)$employee['fullname'], 0, 1, 'UTF-8') : substr((string)$employee['fullname'], 0, 1);
                     ?>
                     <article class="employee-directory-card">
@@ -257,8 +277,8 @@ if ($selectedDepartment !== '') {
                                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 11.2 18a19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.09 3.18 2 2 0 0 1 4.08 1h3a2 2 0 0 1 2 1.72c.12.9.34 1.78.65 2.62a2 2 0 0 1-.45 2.11L8 8.73a16 16 0 0 0 6 6l1.28-1.28a2 2 0 0 1 2.11-.45c.84.31 1.72.53 2.62.65A2 2 0 0 1 22 16.92Z"></path></svg>
                                     شماره تماس
                                 </span>
-                                <?php if ($phone !== '' && $phoneHref !== ''): ?>
-                                    <a class="employee-directory-phone" href="tel:<?php echo employee_h($phoneHref); ?>" dir="ltr"><?php echo employee_h($phone); ?></a>
+                                <?php if ($phone !== ''): ?>
+                                    <span class="employee-directory-phone" dir="ltr"><?php echo employee_h($phone); ?></span>
                                 <?php else: ?>
                                     <span class="employee-directory-no-phone">ثبت نشده</span>
                                 <?php endif; ?>
@@ -267,6 +287,55 @@ if ($selectedDepartment !== '') {
                     </article>
                 <?php endforeach; ?>
             </div>
+            <?php if ($totalPages > 1): ?>
+                <?php
+                $paginationParams = [];
+                if ($search !== '') $paginationParams['q'] = $search;
+                if ($selectedDepartment !== '') $paginationParams['department'] = $selectedDepartment;
+                $pageUrl = function ($pageNumber) use ($paginationParams) {
+                    $params = $paginationParams;
+                    $params['page'] = $pageNumber;
+                    return '/neal/employee-directory.php?' . http_build_query($params);
+                };
+                $rangeStart = $resultCount > 0 ? $offset + 1 : 0;
+                $rangeEnd = min($offset + $perPage, $resultCount);
+                ?>
+                <nav class="employee-directory-pagination" aria-label="صفحه‌بندی فهرست کارکنان">
+                    <div class="employee-directory-pagination-info">
+                        نمایش <strong><?php echo number_format($rangeStart); ?>–<?php echo number_format($rangeEnd); ?></strong>
+                        از <strong><?php echo number_format($resultCount); ?></strong> همکار
+                    </div>
+                    <div class="employee-directory-pagination-controls">
+                        <?php if ($currentPage > 1): ?>
+                            <a class="employee-directory-page-arrow" href="<?php echo employee_h($pageUrl($currentPage - 1)); ?>" aria-label="صفحه قبلی">‹ <span>قبلی</span></a>
+                        <?php else: ?>
+                            <span class="employee-directory-page-arrow is-disabled">‹ <span>قبلی</span></span>
+                        <?php endif; ?>
+                        <?php
+                        $pageNumbers = [];
+                        for ($n = 1; $n <= $totalPages; $n++) {
+                            if ($n === 1 || $n === $totalPages || abs($n - $currentPage) <= 2) $pageNumbers[] = $n;
+                        }
+                        $lastNumber = 0;
+                        foreach ($pageNumbers as $n):
+                            if ($lastNumber && $n > $lastNumber + 1):
+                        ?>
+                            <span class="employee-directory-page-ellipsis">…</span>
+                        <?php endif; ?>
+                            <?php if ($n === $currentPage): ?>
+                                <span class="employee-directory-page-number is-current" aria-current="page"><?php echo $n; ?></span>
+                            <?php else: ?>
+                                <a class="employee-directory-page-number" href="<?php echo employee_h($pageUrl($n)); ?>"><?php echo $n; ?></a>
+                            <?php endif; ?>
+                        <?php $lastNumber = $n; endforeach; ?>
+                        <?php if ($currentPage < $totalPages): ?>
+                            <a class="employee-directory-page-arrow" href="<?php echo employee_h($pageUrl($currentPage + 1)); ?>" aria-label="صفحه بعدی"><span>بعدی</span> ›</a>
+                        <?php else: ?>
+                            <span class="employee-directory-page-arrow is-disabled"><span>بعدی</span> ›</span>
+                        <?php endif; ?>
+                    </div>
+                </nav>
+            <?php endif; ?>
         </section>
     <?php else: ?>
         <section class="employee-directory-state">
