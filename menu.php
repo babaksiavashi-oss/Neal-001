@@ -4,6 +4,7 @@
 <a href="blocked.php">🚫 لیست مسدود شده‌ها</a>
 <a href="reports.php">📊 گزارش‌ها</a>
 <a href="users.php">👥 کاربران</a>
+<a href="employee-directory.php">🧑‍🤝‍🧑 دایرکتوری کارکنان</a>
 <a href="cache.php">⚡ کش</a>
 <a href="settings.php">⚙ تنظیمات</a>
 <a href="logs.php">📄 لاگ‌ها</a>
