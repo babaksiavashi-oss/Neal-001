@@ -57,6 +57,7 @@ try {
 <button type="button">اطلاع‌رسانی⌄</button>
 <div class="neal-user-dropdown">
 <div class="neal-user-section">اطلاع‌رسانی شرکت</div>
+<a href="employee-directory.php">👥 دایرکتوری کارکنان</a>
 <a href="announcements-list.php">📢 اطلاعیه‌های شرکت</a>
 <a href="announcements-list.php">📅 مناسبت‌ها و رویدادها</a>
 </div>
