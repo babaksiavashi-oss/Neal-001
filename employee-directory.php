@@ -179,7 +179,7 @@ if ($selectedDepartment !== '') {
             <span class="employee-directory-stat-icon stat-icon-purple" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
             </span>
-            <span class="employee-directory-stat-copy"><small><?php echo $hasFilters ? 'نتیجه جستجو' : 'نمایش در فهرست'; ?></small><strong><?php echo number_format($resultCount); ?></strong></span>
+            <span class="employee-directory-stat-copy"><small><?php echo $hasFilters ? 'نتیجه جستجو' : 'نمایش در فهرست'; ?></small><strong><?php echo number_format(count($employees)); ?></strong></span>
         </article>
     </section>
 
