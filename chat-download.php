@@ -62,9 +62,13 @@ try {
     $mime = (string)$attachment['mime_type'];
     $allowedMime = [
         'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-        'application/pdf', 'application/vnd.ms-excel',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'text/csv; charset=UTF-8'
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation'
     ];
     if (!in_array($mime, $allowedMime, true)) {
         $mime = 'application/octet-stream';
