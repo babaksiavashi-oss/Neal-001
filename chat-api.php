@@ -58,24 +58,27 @@ try {
                 COALESCE(u.user_status, '') AS user_status,
                 (SELECT p.last_seen FROM chat_presence p WHERE p.user_id = u.id LIMIT 1) AS last_seen,
                 (SELECT m.body FROM chat_messages m
-                    WHERE (m.sender_id = :me AND m.recipient_id = u.id)
-                       OR (m.sender_id = u.id AND m.recipient_id = :me)
+                    WHERE (m.sender_id = :me1 AND m.recipient_id = u.id)
+                       OR (m.sender_id = u.id AND m.recipient_id = :me2)
                     ORDER BY m.id DESC LIMIT 1) AS last_body,
                 (SELECT m.id FROM chat_messages m
-                    WHERE (m.sender_id = :me AND m.recipient_id = u.id)
-                       OR (m.sender_id = u.id AND m.recipient_id = :me)
+                    WHERE (m.sender_id = :me3 AND m.recipient_id = u.id)
+                       OR (m.sender_id = u.id AND m.recipient_id = :me4)
                     ORDER BY m.id DESC LIMIT 1) AS last_id,
                 (SELECT m.created_at FROM chat_messages m
-                    WHERE (m.sender_id = :me AND m.recipient_id = u.id)
-                       OR (m.sender_id = u.id AND m.recipient_id = :me)
+                    WHERE (m.sender_id = :me5 AND m.recipient_id = u.id)
+                       OR (m.sender_id = u.id AND m.recipient_id = :me6)
                     ORDER BY m.id DESC LIMIT 1) AS last_at,
                 (SELECT COUNT(*) FROM chat_messages m
                     WHERE m.sender_id = u.id AND m.recipient_id = :me7 AND m.read_at IS NULL) AS unread_count
             FROM users u
-            WHERE u.is_active = 1 AND u.id <> :me
+            WHERE u.is_active = 1 AND u.id <> :me8
             ORDER BY fullname COLLATE NOCASE ASC, u.id ASC
         ");
-        $stmt->execute([':me' => $myId]);
+        $stmt->execute([
+            ':me1' => $myId, ':me2' => $myId, ':me3' => $myId, ':me4' => $myId,
+            ':me5' => $myId, ':me6' => $myId, ':me7' => $myId, ':me8' => $myId
+        ]);
         $contacts = [];
         foreach ($stmt->fetchAll() as $row) {
             $avatar = neal_avatar_url((string)$row['avatar']);
