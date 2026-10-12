@@ -12,8 +12,8 @@
 .chat-welcome h1{font-size:24px;line-height:1.5;font-weight:800;margin:8px 0 3px;color:#fff}
 .chat-welcome p{font-size:12px;color:#d2e2f0;margin:0}
 .chat-welcome-icon{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:22px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.09);font-size:32px;color:#b8f2e8;transform:rotate(-8deg)}
-.chat-shell{display:grid;grid-template-columns:320px minmax(0,1fr);min-height:670px;max-height:calc(100vh - 260px);height:720px;overflow:hidden;background:#fff;border:1px solid var(--chat-line);border-radius:20px;box-shadow:0 14px 42px rgba(20,42,70,.07)}
-.chat-sidebar{display:flex;flex-direction:column;min-width:0;background:#fbfcfe;border-left:1px solid var(--chat-line)}
+.chat-shell{display:grid;grid-template-columns:320px minmax(0,1fr);grid-template-rows:minmax(0,1fr);min-height:670px;max-height:calc(100vh - 260px);height:720px;overflow:hidden;background:#fff;border:1px solid var(--chat-line);border-radius:20px;box-shadow:0 14px 42px rgba(20,42,70,.07)}
+.chat-sidebar{display:flex;flex-direction:column;min-width:0;min-height:0;height:100%;overflow:hidden;background:#fbfcfe;border-left:1px solid var(--chat-line)}
 .chat-sidebar-head{display:flex;align-items:center;justify-content:space-between;padding:22px 20px 13px}
 .chat-sidebar-head h2{font-size:15px;font-weight:800;margin:0;color:#172b46}
 .chat-sidebar-head p{font-size:10px;color:var(--chat-muted);margin:4px 0 0}
