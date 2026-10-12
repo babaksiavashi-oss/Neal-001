@@ -8,6 +8,7 @@ function neal_chat_db(): PDO {
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     $db->exec('PRAGMA foreign_keys = ON');
+    neal_ensure_profile_columns($db);
     neal_chat_ensure_schema($db);
     return $db;
 }
