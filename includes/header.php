@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?php echo isset($page_title) ? "NEAL Proxy Manager - " . $page_title : "NEAL Proxy Manager"; ?></title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="/neal/css/style.css">
 <?php if (isset($page_css) && is_string($page_css) && preg_match('~^/neal/css/[a-zA-Z0-9._-]+\.css$~', $page_css)): ?>
 <link rel="stylesheet" href="<?php echo htmlspecialchars($page_css, ENT_QUOTES, 'UTF-8'); ?>">
 <?php endif; ?>
@@ -25,7 +25,7 @@
 <body>
 <header class="neal-header-bar">
 <div class="neal-header-brand">
-<img src="images/logo.png" class="logo" alt="NEAL Pharmed">
+<img src="/neal/images/logo.png" class="logo" alt="NEAL Pharmed">
 <div class="neal-header-title">NEAL Proxy Manager<span>Squid Proxy Management System</span></div>
 </div>
 <div class="neal-header-user">
@@ -38,9 +38,9 @@
 <div class="portal-body">
 <?php
 if (isset($portal_mode) && $portal_mode === true) {
-    include "user-menu.php";
+    include __DIR__ . "/user-menu.php";
 } else {
-    include "menu.php";
+    include __DIR__ . "/menu.php";
 }
 ?>
 <div class="content">
