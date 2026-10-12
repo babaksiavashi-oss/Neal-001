@@ -48,6 +48,7 @@
 .chat-sidebar-foot{display:flex;align-items:center;gap:8px;padding:14px 20px;border-top:1px solid #edf0f5;color:#98a4b4;font-size:9px}
 .chat-secure-dot{width:6px;height:6px;border-radius:50%;background:#24b88e}
 .chat-conversation{position:relative;display:flex;min-width:0;min-height:0;background:#fff}
+.chat-empty-state[hidden]{display:none}
 .chat-empty-state{display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;width:100%;padding:30px;color:#7e8da1}
 .chat-empty-art{position:relative;width:230px;height:190px;margin-bottom:14px}
 .chat-empty-orb{position:absolute;left:75px;top:42px;display:grid;place-items:center;width:90px;height:90px;border-radius:29px;background:linear-gradient(135deg,#e5efff,#e0f8f2);color:#3973d0;font-size:36px;box-shadow:0 15px 32px rgba(47,99,174,.12);transform:rotate(-7deg)}
