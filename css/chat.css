@@ -69,6 +69,7 @@
 .chat-peer-info span{font-size:10px;color:#93a0b1}
 .chat-head-actions{margin-right:auto;display:flex;align-items:center;gap:8px}
 .chat-private-label{display:flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid #e4f2ed;border-radius:9px;background:#f5fbf8;color:#43846e;font-size:9px;white-space:nowrap}
+.chat-load-older{align-self:center;flex:0 0 auto;margin:10px auto 0;padding:7px 13px;border:1px solid #e0e8f3;border-radius:9px;background:#fff;color:#54739a;font-family:inherit;font-size:9px;cursor:pointer;box-shadow:0 2px 6px rgba(25,50,80,.03)}.chat-load-older:hover{background:#eef4ff;color:#2f66c8}.chat-load-older:disabled{opacity:.5;cursor:wait}.chat-load-older[hidden]{display:none}
 .chat-message-list{display:flex;flex:1;flex-direction:column;gap:12px;min-height:0;overflow:auto;padding:22px 25px 18px;background-color:#fbfcfe;background-image:radial-gradient(#e8edf5 .8px,transparent .8px);background-size:20px 20px;scrollbar-width:thin;scrollbar-color:#d7e0eb transparent}
 .chat-message-row{display:flex;justify-content:flex-start;width:100%}
 .chat-message-row.is-mine{justify-content:flex-end}
