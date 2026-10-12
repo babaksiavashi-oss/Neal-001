@@ -91,6 +91,7 @@ $page_css = '/neal/css/chat.css';
                     </div>
                 </header>
 
+                <button type="button" class="chat-load-older" id="chatLoadOlder" hidden>نمایش پیام‌های قدیمی‌تر</button>
                 <div class="chat-message-list" id="chatMessageList" aria-live="polite">
                     <div class="chat-loading"><span class="chat-spinner"></span> در حال دریافت پیام‌ها…</div>
                 </div>
@@ -147,6 +148,7 @@ $page_css = '/neal/css/chat.css';
     const empty = document.getElementById('chatEmptyState');
     const active = document.getElementById('chatActiveConversation');
     const messagesBox = document.getElementById('chatMessageList');
+    const loadOlderButton = document.getElementById('chatLoadOlder');
     const input = document.getElementById('chatMessageInput');
     const sendButton = document.getElementById('chatSendButton');
     const fileInput = document.getElementById('chatFileInput');
@@ -247,6 +249,7 @@ $page_css = '/neal/css/chat.css';
     function renderMessage(message) {
         const mine = Number(message.sender_id) === myId;
         const row = make('div', 'chat-message-row' + (mine ? ' is-mine' : ''));
+        row.dataset.messageId = String(message.id);
         const bubble = make('div', 'chat-message-bubble' + (message.attachment ? ' has-attachment' : ''));
         if (message.body) bubble.appendChild(make('div', 'chat-message-text', message.body));
         if (message.attachment) {
@@ -328,6 +331,7 @@ $page_css = '/neal/css/chat.css';
             if (!activePeer || activePeer.id !== requestedPeerId) return;
             if (replace) {
                 lastMessageId = 0;
+                loadOlderButton.hidden = !data.has_older;
                 renderMessages(data.messages || [], true);
             } else if ((data.messages || []).length) {
                 const noMessages = messagesBox.querySelector('.chat-no-messages');
@@ -338,6 +342,41 @@ $page_css = '/neal/css/chat.css';
             if (!replace) showToast(error.message, true);
         } finally {
             messageBusy = false;
+            if (activePeer && activePeer.id !== requestedPeerId) loadMessages(true);
+        }
+    }
+
+    async function loadOlderMessages() {
+        if (!activePeer || messageBusy) return;
+        const firstRow = messagesBox.querySelector('.chat-message-row');
+        const beforeId = firstRow ? Number(firstRow.dataset.messageId || 0) : 0;
+        if (!beforeId) {
+            loadOlderButton.hidden = true;
+            return;
+        }
+        const requestedPeerId = activePeer.id;
+        const oldHeight = messagesBox.scrollHeight;
+        const oldTop = messagesBox.scrollTop;
+        messageBusy = true;
+        loadOlderButton.disabled = true;
+        try {
+            const data = await request('messages', { peer_id: requestedPeerId, before_id: beforeId });
+            if (!activePeer || activePeer.id !== requestedPeerId) return;
+            if (!(data.messages || []).length) {
+                loadOlderButton.hidden = true;
+                return;
+            }
+            const existingNodes = Array.from(messagesBox.childNodes);
+            messagesBox.replaceChildren();
+            data.messages.forEach(function (message) { renderMessage(message); });
+            existingNodes.forEach(function (node) { messagesBox.appendChild(node); });
+            messagesBox.scrollTop = messagesBox.scrollHeight - oldHeight + oldTop;
+            loadOlderButton.hidden = !data.has_older;
+        } catch (error) {
+            showToast(error.message, true);
+        } finally {
+            messageBusy = false;
+            loadOlderButton.disabled = false;
             if (activePeer && activePeer.id !== requestedPeerId) loadMessages(true);
         }
     }
@@ -386,6 +425,7 @@ $page_css = '/neal/css/chat.css';
         input.style.height = Math.min(input.scrollHeight, 120) + 'px';
     }
 
+    loadOlderButton.addEventListener('click', loadOlderMessages);
     document.getElementById('chatComposer').addEventListener('submit', function (event) {
         event.preventDefault();
         sendMessage(input.value);
