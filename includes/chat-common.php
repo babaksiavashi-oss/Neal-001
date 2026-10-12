@@ -53,7 +53,7 @@ function neal_chat_ensure_schema(PDO $db): void {
 
 function neal_chat_attachment_dir(): string {
     // Sibling of the public /neal webroot, not directly web-accessible.
-    return dirname(__DIR__) . '/neal-chat-attachments';
+    return dirname(dirname(__DIR__)) . '/neal-chat-attachments';
 }
 
 function neal_chat_cleanup_expired(PDO $db): int {
