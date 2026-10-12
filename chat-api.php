@@ -70,7 +70,7 @@ try {
                        OR (m.sender_id = u.id AND m.recipient_id = :me)
                     ORDER BY m.id DESC LIMIT 1) AS last_at,
                 (SELECT COUNT(*) FROM chat_messages m
-                    WHERE m.sender_id = u.id AND m.recipient_id = :me AND m.read_at IS NULL) AS unread_count
+                    WHERE m.sender_id = u.id AND m.recipient_id = :me7 AND m.read_at IS NULL) AS unread_count
             FROM users u
             WHERE u.is_active = 1 AND u.id <> :me
             ORDER BY fullname COLLATE NOCASE ASC, u.id ASC
