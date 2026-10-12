@@ -810,7 +810,7 @@ include "includes/header.php";
 
 /* =========================================================
    SARG Top Users
-   Parse table cells without relying on exact SARG whitespace.
+   Parse SARG table cells, including the icon column before USERID.
    ========================================================= */
 
 $top_users = array();
@@ -834,7 +834,7 @@ if ($latest !== "" && is_file($current . "/index.html")) {
                 continue;
             }
 
-            $name_html = $cells[1] ?? '';
+            $name_html = $cells[2] ?? '';
             if (preg_match('/<a\b[^>]*>(.*?)<\/a>/is', $name_html, $name_match)) {
                 $username = trim(html_entity_decode(strip_tags($name_match[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
             } else {
@@ -848,13 +848,13 @@ if ($latest !== "" && is_file($current . "/index.html")) {
             $top_users[] = array(
                 "rank" => (int)$rank_text,
                 "username" => $username,
-                "connect" => trim(html_entity_decode(strip_tags($cells[2] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
-                "bytes" => trim(html_entity_decode(strip_tags($cells[3] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
-                "percent_bytes" => trim(html_entity_decode(strip_tags($cells[4] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
-                "cache" => trim(html_entity_decode(strip_tags($cells[5] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
-                "time" => trim(html_entity_decode(strip_tags($cells[6] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
-                "milliseconds" => trim(html_entity_decode(strip_tags($cells[7] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
-                "time_percent" => trim(html_entity_decode(strip_tags($cells[8] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'))
+                "connect" => trim(html_entity_decode(strip_tags($cells[3] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "bytes" => trim(html_entity_decode(strip_tags($cells[4] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "percent_bytes" => trim(html_entity_decode(strip_tags($cells[5] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "cache" => trim(html_entity_decode(strip_tags($cells[6] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "time" => trim(html_entity_decode(strip_tags($cells[8] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "milliseconds" => trim(html_entity_decode(strip_tags($cells[9] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "time_percent" => trim(html_entity_decode(strip_tags($cells[10] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'))
             );
 
             if (count($top_users) >= 10) {
