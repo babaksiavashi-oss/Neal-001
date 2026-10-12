@@ -45,6 +45,7 @@ try {
 </style>
 <a class="neal-user-brand" href="portal.php">NEAL <small>پورتال کارکنان</small></a>
 <a href="portal.php">خانه</a>
+<a href="chat.php">💬 پیام‌رسان همکاران</a>
 <div class="neal-user-group">
 <button type="button">خدمات⌄</button>
 <div class="neal-user-dropdown">
