@@ -321,9 +321,11 @@ $page_css = '/neal/css/chat.css';
 
     async function loadMessages(replace) {
         if (!activePeer || messageBusy) return;
+        const requestedPeerId = activePeer.id;
         messageBusy = true;
         try {
-            const data = await request('messages', { peer_id: activePeer.id, after_id: replace ? 0 : lastMessageId });
+            const data = await request('messages', { peer_id: requestedPeerId, after_id: replace ? 0 : lastMessageId });
+            if (!activePeer || activePeer.id !== requestedPeerId) return;
             if (replace) {
                 lastMessageId = 0;
                 renderMessages(data.messages || [], true);
@@ -332,11 +334,11 @@ $page_css = '/neal/css/chat.css';
                 if (noMessages) noMessages.remove();
                 renderMessages(data.messages, false);
             }
-            await loadContacts(true);
         } catch (error) {
             if (!replace) showToast(error.message, true);
         } finally {
             messageBusy = false;
+            if (activePeer && activePeer.id !== requestedPeerId) loadMessages(true);
         }
     }
 
@@ -355,17 +357,21 @@ $page_css = '/neal/css/chat.css';
         emojiPanel.hidden = true;
         stickerPanel.hidden = true;
         loadMessages(true);
+        loadContacts(true);
         input.focus();
     }
 
     async function sendMessage(text) {
         if (!activePeer || !text.trim()) return;
+        const requestedPeerId = activePeer.id;
         sendButton.disabled = true;
         try {
-            await request('send', { peer_id: activePeer.id, body: text.trim() });
-            input.value = '';
-            resizeInput();
-            await loadMessages(false);
+            await request('send', { peer_id: requestedPeerId, body: text.trim() });
+            if (activePeer && activePeer.id === requestedPeerId) {
+                input.value = '';
+                resizeInput();
+                await loadMessages(false);
+            }
             await loadContacts(true);
         } catch (error) {
             showToast(error.message, true);
@@ -422,7 +428,7 @@ $page_css = '/neal/css/chat.css';
             const data = await response.json();
             if (!response.ok || !data.ok) throw new Error(data.error || 'ارسال فایل ناموفق بود.');
             fileInput.value = '';
-            await loadMessages(false);
+            if (activePeer && activePeer.id === Number(form.get('peer_id'))) await loadMessages(false);
             await loadContacts(true);
             showToast(data.notice || 'فایل ارسال شد و تا ۱۰ روز روی سرور می‌ماند.', false);
         } catch (error) {
@@ -477,9 +483,11 @@ $page_css = '/neal/css/chat.css';
 
     loadContacts(false);
     window.setInterval(function () {
-        loadContacts(true);
         if (activePeer) loadMessages(false);
     }, 4000);
+    window.setInterval(function () {
+        loadContacts(true);
+    }, 15000);
 })();
 </script>
 
