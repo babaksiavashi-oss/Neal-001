@@ -122,7 +122,7 @@ $page_css = '/neal/css/chat.css';
                         <button type="button" class="chat-tool-button" id="chatEmojiButton" title="ایموجی" aria-label="انتخاب ایموجی">☺</button>
                         <button type="button" class="chat-tool-button" id="chatStickerButton" title="استیکرهای سبک" aria-label="استیکرهای سبک">✧</button>
                         <button type="button" class="chat-tool-button chat-attach-button" id="chatAttachButton" title="ارسال فایل" aria-label="ارسال فایل">＋</button>
-                        <input type="file" id="chatFileInput" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.xls,.xlsx,.csv" hidden>
+                        <input type="file" id="chatFileInput" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" hidden>
                         <textarea id="chatMessageInput" rows="1" maxlength="2000" placeholder="پیام خود را بنویسید…" aria-label="متن پیام"></textarea>
                         <button type="submit" class="chat-send-button" id="chatSendButton" aria-label="ارسال پیام"><span>ارسال</span><b>➤</b></button>
                     </form>
@@ -450,9 +450,9 @@ $page_css = '/neal/css/chat.css';
             fileInput.value = '';
             return;
         }
-        const allowed = /\.(jpe?g|png|gif|webp|pdf|xls|xlsx|csv)$/i;
+        const allowed = /\.(jpe?g|png|gif|webp|pdf|doc|docx|xls|xlsx|ppt|pptx)$/i;
         if (!allowed.test(file.name)) {
-            showToast('فقط تصاویر، PDF و فایل‌های Excel با پسوند XLS/XLSX/CSV مجاز هستند.', true);
+            showToast('فقط تصاویر، PDF و فایل‌های Word، Excel و PowerPoint با فرمت DOC/DOCX، XLS/XLSX و PPT/PPTX مجاز هستند.', true);
             fileInput.value = '';
             return;
         }
