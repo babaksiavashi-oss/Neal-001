@@ -173,6 +173,18 @@ if (file_exists($db_file)) {
    Dynamic Dashboard
    ========================= */
 
+$dashboard_status_labels = [
+    "new" => "جدید",
+    "assigned" => "تخصیص داده شده",
+    "in_progress" => "در حال بررسی",
+    "waiting_user" => "منتظر پاسخ کاربر",
+    "resolved" => "حل شده",
+    "closed" => "بسته شده",
+    "cancelled" => "لغو شده",
+    "open" => "باز",
+    "pending" => "در انتظار"
+];
+
 $dashboard_data = [
     "users" => 0,
     "active_users" => 0,
@@ -217,7 +229,7 @@ try {
     if ($table_exists("service_requests")) {
         $dashboard_data["open_requests"] = (int)$dashboard_db->query("
             SELECT COUNT(*) FROM service_requests
-            WHERE status IN ('new','open','in_progress','pending')
+            WHERE status NOT IN ('closed','resolved','cancelled')
         ")->fetchColumn();
 
         $dashboard_data["new_requests"] = (int)$dashboard_db->query("
@@ -225,7 +237,7 @@ try {
         ")->fetchColumn();
 
         $dashboard_data["recent_requests"] = $dashboard_db->query("
-            SELECT tracking_number, fullname, subject, priority, status
+            SELECT id, tracking_number, fullname, subject, priority, status
             FROM service_requests
             ORDER BY id DESC
             LIMIT 5
@@ -396,11 +408,11 @@ include "includes/header.php";
             <span class="dynamic-stat-icon">📅</span>
             <span><small>مناسبت‌های فعال</small><strong><?php echo number_format($dashboard_data["active_occasions"]); ?></strong></span>
         </a>
-        <a class="dynamic-stat" href="tickets.php">
+        <a class="dynamic-stat" href="tickets.php?queue=all">
             <span class="dynamic-stat-icon">🎫</span>
             <span><small>درخواست‌های باز</small><strong><?php echo number_format($dashboard_data["open_requests"]); ?></strong></span>
         </a>
-        <a class="dynamic-stat" href="tickets.php">
+        <a class="dynamic-stat" href="tickets.php?queue=new">
             <span class="dynamic-stat-icon">🆕</span>
             <span><small>درخواست جدید</small><strong><?php echo number_format($dashboard_data["new_requests"]); ?></strong></span>
         </a>
@@ -410,13 +422,14 @@ include "includes/header.php";
     <div class="dashboard-recent-requests">
         <div class="dashboard-subtitle">آخرین درخواست‌های خدمات</div>
         <?php foreach ($dashboard_data["recent_requests"] as $request): ?>
+        <?php $request_status = $request["status"] ?? ""; ?>
         <div class="dashboard-request-row">
             <div>
-                <strong><?php echo htmlspecialchars($request["tracking_number"] ?? "—", ENT_QUOTES, "UTF-8"); ?></strong>
+                <strong><a class="dashboard-request-link" href="ticket-manage.php?id=<?php echo (int)($request["id"] ?? 0); ?>"><?php echo htmlspecialchars($request["tracking_number"] ?? "—", ENT_QUOTES, "UTF-8"); ?></a></strong>
                 <span><?php echo htmlspecialchars($request["fullname"] ?? "—", ENT_QUOTES, "UTF-8"); ?> · <?php echo htmlspecialchars($request["subject"] ?? "—", ENT_QUOTES, "UTF-8"); ?></span>
             </div>
             <span class="dashboard-request-status status-<?php echo htmlspecialchars($request["status"] ?? "new", ENT_QUOTES, "UTF-8"); ?>">
-                <?php echo htmlspecialchars($request["status"] ?? "—", ENT_QUOTES, "UTF-8"); ?>
+                <?php echo htmlspecialchars($dashboard_status_labels[$request_status] ?? ($request_status !== "" ? $request_status : "—"), ENT_QUOTES, "UTF-8"); ?>
             </span>
         </div>
         <?php endforeach; ?>
@@ -821,7 +834,7 @@ if ($latest !== "" && is_file($current . "/index.html")) {
                 continue;
             }
 
-            $name_html = $cells[2] ?? '';
+            $name_html = $cells[1] ?? '';
             if (preg_match('/<a\b[^>]*>(.*?)<\/a>/is', $name_html, $name_match)) {
                 $username = trim(html_entity_decode(strip_tags($name_match[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
             } else {
@@ -835,13 +848,13 @@ if ($latest !== "" && is_file($current . "/index.html")) {
             $top_users[] = array(
                 "rank" => (int)$rank_text,
                 "username" => $username,
-                "connect" => trim(html_entity_decode(strip_tags($cells[3] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
-                "bytes" => trim(html_entity_decode(strip_tags($cells[4] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
-                "percent_bytes" => trim(html_entity_decode(strip_tags($cells[5] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
-                "cache" => trim(html_entity_decode(strip_tags($cells[6] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
-                "time" => trim(html_entity_decode(strip_tags($cells[7] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
-                "milliseconds" => trim(html_entity_decode(strip_tags($cells[8] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
-                "time_percent" => trim(html_entity_decode(strip_tags($cells[9] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'))
+                "connect" => trim(html_entity_decode(strip_tags($cells[2] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "bytes" => trim(html_entity_decode(strip_tags($cells[3] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "percent_bytes" => trim(html_entity_decode(strip_tags($cells[4] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "cache" => trim(html_entity_decode(strip_tags($cells[5] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "time" => trim(html_entity_decode(strip_tags($cells[6] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "milliseconds" => trim(html_entity_decode(strip_tags($cells[7] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                "time_percent" => trim(html_entity_decode(strip_tags($cells[8] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'))
             );
 
             if (count($top_users) >= 10) {
@@ -1941,7 +1954,7 @@ if ($latest !== "" && is_file($current . "/topsites.html")) {
 }
 
 
-.dashboard-dynamic-card{margin-top:24px}.dashboard-dynamic-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:18px}.dynamic-stat{display:flex;align-items:center;gap:10px;padding:13px;border:1px solid #eaecf0;border-radius:12px;background:#fff;text-decoration:none;color:inherit;transition:.18s}.dynamic-stat:hover{transform:translateY(-2px);box-shadow:0 7px 18px rgba(16,24,40,.07);border-color:#d0d5dd}.dynamic-stat-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:#f2f4f7;font-size:18px}.dynamic-stat small{display:block;color:#667085;font-size:9px;line-height:1.5}.dynamic-stat strong{display:block;color:#101828;font-size:17px;margin-top:3px}.dashboard-recent-requests{margin-top:18px;border-top:1px solid #eaecf0;padding-top:15px}.dashboard-subtitle{font-size:12px;font-weight:700;color:#344054;margin-bottom:8px}.dashboard-request-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 4px;border-bottom:1px solid #f2f4f7}.dashboard-request-row:last-child{border-bottom:0}.dashboard-request-row strong{display:block;font-size:11px;color:#101828}.dashboard-request-row div span{display:block;font-size:10px;color:#98a2b3;margin-top:3px}.dashboard-request-status{padding:4px 8px;border-radius:20px;background:#f2f4f7;color:#475467;font-size:9px;white-space:nowrap}.status-new{background:#eef4ff;color:#3159a6}.status-in_progress{background:#fff4cc;color:#9a6700}.status-open{background:#ecfdf3;color:#027a48}.status-pending{background:#fff1f3;color:#c01048}@media(max-width:1100px){.dashboard-dynamic-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:650px){.dashboard-dynamic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-request-row{align-items:flex-start;flex-direction:column}}
+.dashboard-dynamic-card{margin-top:24px}.dashboard-dynamic-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:18px}.dynamic-stat{display:flex;align-items:center;gap:10px;padding:13px;border:1px solid #eaecf0;border-radius:12px;background:#fff;text-decoration:none;color:inherit;transition:.18s}.dynamic-stat:hover{transform:translateY(-2px);box-shadow:0 7px 18px rgba(16,24,40,.07);border-color:#d0d5dd}.dynamic-stat-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:#f2f4f7;font-size:18px}.dynamic-stat small{display:block;color:#667085;font-size:9px;line-height:1.5}.dynamic-stat strong{display:block;color:#101828;font-size:17px;margin-top:3px}.dashboard-recent-requests{margin-top:18px;border-top:1px solid #eaecf0;padding-top:15px}.dashboard-subtitle{font-size:12px;font-weight:700;color:#344054;margin-bottom:8px}.dashboard-request-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 4px;border-bottom:1px solid #f2f4f7}.dashboard-request-row:last-child{border-bottom:0}.dashboard-request-row strong{display:block;font-size:11px;color:#101828}.dashboard-request-link{color:inherit;text-decoration:none}.dashboard-request-link:hover{color:#3159a6;text-decoration:underline}.dashboard-request-row div span{display:block;font-size:10px;color:#98a2b3;margin-top:3px}.dashboard-request-status{padding:4px 8px;border-radius:20px;background:#f2f4f7;color:#475467;font-size:9px;white-space:nowrap}.status-new{background:#eef4ff;color:#3159a6}.status-in_progress{background:#fff4cc;color:#9a6700}.status-open{background:#ecfdf3;color:#027a48}.status-pending{background:#fff1f3;color:#c01048}@media(max-width:1100px){.dashboard-dynamic-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:650px){.dashboard-dynamic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-request-row{align-items:flex-start;flex-direction:column}}
 </style>
 
 
