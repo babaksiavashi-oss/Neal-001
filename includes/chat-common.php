@@ -146,7 +146,7 @@ function neal_chat_validate_upload(array $file): array {
         throw new RuntimeException('ماژول PHP Fileinfo فعال نیست؛ امکان بررسی امن نوع فایل وجود ندارد.');
     }
     $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mime = (string)$finfo->file($tmp);
+    $mime = strtolower((string)$finfo->file($tmp));
     $sizeActual = filesize($tmp);
     if ($sizeActual === false || (int)$sizeActual !== $size) {
         throw new RuntimeException('خواندن اندازه واقعی فایل ناموفق بود.');
@@ -177,7 +177,7 @@ function neal_chat_validate_upload(array $file): array {
         $handle = @fopen($tmp, 'rb');
         $signature = $handle ? fread($handle, 8) : '';
         if ($handle) fclose($handle);
-        $validMime = in_array($mime, ['application/vnd.ms-excel', 'application/x-ole-storage', 'application/CDFV2', 'application/octet-stream'], true);
+        $validMime = in_array($mime, ['application/vnd.ms-excel', 'application/x-ole-storage', 'application/cdfv2', 'application/x-cfb', 'application/octet-stream'], true);
         if ($signature !== hex2bin('D0CF11E0A1B11AE1') || !$validMime) {
             throw new RuntimeException('محتوای فایل Excel قدیمی (XLS) معتبر نیست.');
         }
@@ -190,18 +190,19 @@ function neal_chat_validate_upload(array $file): array {
         if ($signature !== "PK\x03\x04" || !$validMime) {
             throw new RuntimeException('محتوای فایل Excel (XLSX) معتبر نیست.');
         }
-        if (class_exists('ZipArchive')) {
-            $zip = new ZipArchive();
-            if ($zip->open($tmp) !== true) {
-                throw new RuntimeException('ساختار فایل XLSX معتبر نیست.');
-            }
-            $hasWorkbook = $zip->locateName('xl/workbook.xml') !== false;
-            $hasTypes = $zip->locateName('[Content_Types].xml') !== false;
-            $hasMacros = $zip->locateName('xl/vbaProject.bin') !== false;
-            $zip->close();
-            if (!$hasWorkbook || !$hasTypes || $hasMacros) {
-                throw new RuntimeException('فایل باید یک workbook استاندارد XLSX و بدون ماکرو باشد.');
-            }
+        if (!class_exists('ZipArchive')) {
+            throw new RuntimeException('برای بررسی امن فایل XLSX، افزونه PHP zip باید فعال باشد؛ تا آن زمان می‌توانید فایل XLS یا CSV ارسال کنید.');
+        }
+        $zip = new ZipArchive();
+        if ($zip->open($tmp) !== true) {
+            throw new RuntimeException('ساختار فایل XLSX معتبر نیست.');
+        }
+        $hasWorkbook = $zip->locateName('xl/workbook.xml') !== false;
+        $hasTypes = $zip->locateName('[Content_Types].xml') !== false;
+        $hasMacros = $zip->locateName('xl/vbaProject.bin') !== false;
+        $zip->close();
+        if (!$hasWorkbook || !$hasTypes || $hasMacros) {
+            throw new RuntimeException('فایل باید یک workbook استاندارد XLSX و بدون ماکرو باشد.');
         }
         $storedMime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     } else {
