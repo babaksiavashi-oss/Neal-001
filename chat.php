@@ -234,7 +234,7 @@ $page_css = '/neal/css/chat.css';
             const details = make('span', 'chat-contact-details');
             const top = make('span', 'chat-contact-top');
             top.appendChild(make('strong', '', contact.fullname));
-            if (contact.last_body) top.appendChild(make('time', 'chat-contact-time', relativeTime(contact.last_id ? '' : '')));
+            if (contact.last_body) top.appendChild(make('time', 'chat-contact-time', relativeTime(contact.last_at || '')));
             details.appendChild(top);
             details.appendChild(make('span', 'chat-contact-preview', contact.last_body || (contact.user_status || '@' + contact.username)));
             item.appendChild(avatarWrap);
