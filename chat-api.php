@@ -65,6 +65,10 @@ try {
                     WHERE (m.sender_id = :me AND m.recipient_id = u.id)
                        OR (m.sender_id = u.id AND m.recipient_id = :me)
                     ORDER BY m.id DESC LIMIT 1) AS last_id,
+                (SELECT m.created_at FROM chat_messages m
+                    WHERE (m.sender_id = :me AND m.recipient_id = u.id)
+                       OR (m.sender_id = u.id AND m.recipient_id = :me)
+                    ORDER BY m.id DESC LIMIT 1) AS last_at,
                 (SELECT COUNT(*) FROM chat_messages m
                     WHERE m.sender_id = u.id AND m.recipient_id = :me AND m.read_at IS NULL) AS unread_count
             FROM users u
@@ -83,8 +87,9 @@ try {
                 'avatar' => '/neal/' . ltrim($avatar, '/'),
                 'user_status' => (string)$row['user_status'],
                 'online' => $lastSeen >= ($now - 90),
-                'last_body' => (string)($row['last_body'] ?? ''),
+                'last_body' => ((string)($row['last_body'] ?? '') !== '' ? (string)$row['last_body'] : (!empty($row['last_id']) ? '📎 فایل پیوست' : '')),
                 'last_id' => (int)($row['last_id'] ?? 0),
+                'last_at' => (string)($row['last_at'] ?? ''),
                 'unread_count' => (int)$row['unread_count']
             ];
         }
