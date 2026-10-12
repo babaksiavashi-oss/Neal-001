@@ -137,9 +137,13 @@ function neal_chat_validate_upload(array $file): array {
 
     $original = neal_chat_clean_filename((string)($file['name'] ?? 'attachment'));
     $extension = strtolower(pathinfo($original, PATHINFO_EXTENSION));
-    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'xls', 'xlsx', 'csv'];
+    $allowed = [
+        'jpg', 'jpeg', 'png', 'gif', 'webp',
+        'pdf',
+        'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'
+    ];
     if (!in_array($extension, $allowed, true)) {
-        throw new RuntimeException('فقط تصاویر JPG/PNG/GIF/WEBP، فایل PDF و فایل‌های Excel با پسوند XLS/XLSX/CSV مجاز هستند.');
+        throw new RuntimeException('فقط تصاویر JPG/JPEG/PNG/GIF/WEBP، فایل PDF و فایل‌های Word/DOC/DOCX، Excel/XLS/XLSX و PowerPoint/PPT/PPTX مجاز هستند. فایل‌های ماکرو‌دار، فشرده و اجرایی مجاز نیستند.');
     }
 
     if (!class_exists('finfo')) {
@@ -173,47 +177,65 @@ function neal_chat_validate_upload(array $file): array {
             throw new RuntimeException('محتوای فایل PDF معتبر نیست.');
         }
         $storedMime = 'application/pdf';
-    } elseif ($extension === 'xls') {
+    } elseif (in_array($extension, ['doc', 'xls', 'ppt'], true)) {
         $handle = @fopen($tmp, 'rb');
         $signature = $handle ? fread($handle, 8) : '';
         if ($handle) fclose($handle);
-        $validMime = in_array($mime, ['application/vnd.ms-excel', 'application/x-ole-storage', 'application/cdfv2', 'application/x-cfb', 'application/octet-stream'], true);
-        if ($signature !== hex2bin('D0CF11E0A1B11AE1') || !$validMime) {
-            throw new RuntimeException('محتوای فایل Excel قدیمی (XLS) معتبر نیست.');
+        $validMimes = [
+            'application/x-ole-storage', 'application/cdfv2',
+            'application/x-cfb', 'application/octet-stream',
+            'application/msword', 'application/vnd.ms-excel',
+            'application/vnd.ms-powerpoint'
+        ];
+        if ($signature !== hex2bin('D0CF11E0A1B11AE1') || !in_array($mime, $validMimes, true)) {
+            throw new RuntimeException('محتوای فایل Office قدیمی (DOC/XLS/PPT) معتبر نیست.');
         }
-        $storedMime = 'application/vnd.ms-excel';
-    } elseif ($extension === 'xlsx') {
+        $storedMime = [
+            'doc' => 'application/msword',
+            'xls' => 'application/vnd.ms-excel',
+            'ppt' => 'application/vnd.ms-powerpoint'
+        ][$extension];
+    } else {
+        // DOCX/XLSX/PPTX are ZIP-based Office Open XML packages.
+        $validMimes = [
+            'application/zip',
+            'application/octet-stream',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+        ];
         $handle = @fopen($tmp, 'rb');
         $signature = $handle ? fread($handle, 4) : '';
         if ($handle) fclose($handle);
-        $validMime = in_array($mime, ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/zip', 'application/octet-stream'], true);
-        if ($signature !== "PK\x03\x04" || !$validMime) {
-            throw new RuntimeException('محتوای فایل Excel (XLSX) معتبر نیست.');
+        if ($signature !== "PK\x03\x04" || !in_array($mime, $validMimes, true)) {
+            throw new RuntimeException('ساختار فایل Office جدید معتبر نیست.');
         }
         if (!class_exists('ZipArchive')) {
-            throw new RuntimeException('برای بررسی امن فایل XLSX، افزونه PHP zip باید فعال باشد؛ تا آن زمان می‌توانید فایل XLS یا CSV ارسال کنید.');
+            throw new RuntimeException('برای بررسی امن فایل‌های DOCX/XLSX/PPTX، افزونه PHP zip باید فعال باشد.');
         }
         $zip = new ZipArchive();
         if ($zip->open($tmp) !== true) {
-            throw new RuntimeException('ساختار فایل XLSX معتبر نیست.');
+            throw new RuntimeException('ساختار فایل Office معتبر نیست.');
         }
-        $hasWorkbook = $zip->locateName('xl/workbook.xml') !== false;
         $hasTypes = $zip->locateName('[Content_Types].xml') !== false;
-        $hasMacros = $zip->locateName('xl/vbaProject.bin') !== false;
+        $hasMacros = $zip->locateName('word/vbaProject.bin') !== false
+            || $zip->locateName('xl/vbaProject.bin') !== false
+            || $zip->locateName('ppt/vbaProject.bin') !== false;
+        $requiredEntry = [
+            'docx' => 'word/document.xml',
+            'xlsx' => 'xl/workbook.xml',
+            'pptx' => 'ppt/presentation.xml'
+        ][$extension];
+        $hasMainDocument = $zip->locateName($requiredEntry) !== false;
         $zip->close();
-        if (!$hasWorkbook || !$hasTypes || $hasMacros) {
-            throw new RuntimeException('فایل باید یک workbook استاندارد XLSX و بدون ماکرو باشد.');
+        if (!$hasTypes || !$hasMainDocument || $hasMacros) {
+            throw new RuntimeException('فایل باید سند استاندارد Office و بدون ماکرو باشد.');
         }
-        $storedMime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-    } else {
-        if (!in_array($mime, ['text/plain', 'text/csv', 'application/csv', 'application/vnd.ms-excel', 'application/octet-stream'], true)) {
-            throw new RuntimeException('نوع واقعی فایل CSV معتبر نیست.');
-        }
-        $contents = file_get_contents($tmp);
-        if ($contents === false || strpos($contents, "\0") !== false) {
-            throw new RuntimeException('فایل CSV معتبر نیست یا شامل داده باینری است.');
-        }
-        $storedMime = 'text/csv; charset=UTF-8';
+        $storedMime = [
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+        ][$extension];
     }
 
     return [
