@@ -108,6 +108,7 @@ try {
         $peerId = (int)($_POST['peer_id'] ?? 0);
         $peer = $getPeer($db, $peerId, $myId);
         $afterId = max(0, (int)($_POST['after_id'] ?? 0));
+        $beforeId = max(0, (int)($_POST['before_id'] ?? 0));
 
         $read = $db->prepare('UPDATE chat_messages SET read_at = COALESCE(read_at, ?) WHERE sender_id = ? AND recipient_id = ? AND read_at IS NULL');
         $read->execute([$now, $peerId, $myId]);
@@ -121,14 +122,25 @@ try {
             LEFT JOIN chat_attachments a ON a.message_id = m.id
             WHERE ((m.sender_id = ? AND m.recipient_id = ?) OR (m.sender_id = ? AND m.recipient_id = ?))
         ";
-        if ($afterId > 0) {
+        $hasOlder = false;
+        if ($beforeId > 0) {
+            $stmt = $db->prepare($baseSelect . ' AND m.id < ? ORDER BY m.id DESC LIMIT 101');
+            $stmt->execute([$myId, $peerId, $peerId, $myId, $beforeId]);
+            $rows = $stmt->fetchAll();
+            $hasOlder = count($rows) > 100;
+            if ($hasOlder) array_pop($rows);
+            $rows = array_reverse($rows);
+        } elseif ($afterId > 0) {
             $stmt = $db->prepare($baseSelect . ' AND m.id > ? ORDER BY m.id ASC LIMIT 100');
             $stmt->execute([$myId, $peerId, $peerId, $myId, $afterId]);
             $rows = $stmt->fetchAll();
         } else {
-            $stmt = $db->prepare($baseSelect . ' ORDER BY m.id DESC LIMIT 100');
+            $stmt = $db->prepare($baseSelect . ' ORDER BY m.id DESC LIMIT 101');
             $stmt->execute([$myId, $peerId, $peerId, $myId]);
-            $rows = array_reverse($stmt->fetchAll());
+            $rows = $stmt->fetchAll();
+            $hasOlder = count($rows) > 100;
+            if ($hasOlder) array_pop($rows);
+            $rows = array_reverse($rows);
         }
 
         $messages = [];
@@ -166,6 +178,7 @@ try {
                 'user_status' => (string)$peer['user_status']
             ],
             'messages' => $messages,
+            'has_older' => $hasOlder,
             'server_time' => $now
         ]);
     }
