@@ -66,8 +66,9 @@ function neal_chat_cleanup_expired(PDO $db): int {
 
     foreach ($expired as $item) {
         $stored = basename((string)($item['stored_name'] ?? ''));
-        if ($stored !== '' && is_file($dir . '/' . $stored)) {
-            @unlink($dir . '/' . $stored);
+        if ($stored !== '' && is_file($dir . '/' . $stored) && !@unlink($dir . '/' . $stored)) {
+            // Keep the database reference so a later cleanup run can retry.
+            continue;
         }
         $update = $db->prepare('UPDATE chat_attachments SET stored_name = NULL, deleted_at = ? WHERE id = ? AND expires_at <= ?');
         $update->execute([$now, (int)$item['id'], $now]);
