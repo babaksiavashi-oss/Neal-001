@@ -8,6 +8,11 @@ if (!is_user_logged_in()) {
     neal_chat_json(['ok' => false, 'error' => 'برای استفاده از پیام‌رسان ابتدا وارد حساب کاربری شوید.'], 401);
 }
 
+$contentLength = (int)($_SERVER['CONTENT_LENGTH'] ?? 0);
+if (!isset($_POST['action']) && $contentLength > 0) {
+    neal_chat_json(['ok' => false, 'error' => 'درخواست فایل از محدودیت post_max_size در تنظیمات PHP بیشتر است؛ محدودیت آپلود سرور باید حداقل ۱۲ مگابایت باشد.'], 413);
+}
+
 $token = (string)($_SESSION['neal_chat_csrf'] ?? '');
 $postedToken = (string)($_POST['csrf'] ?? '');
 if ($token === '' || $postedToken === '' || !hash_equals($token, $postedToken)) {
