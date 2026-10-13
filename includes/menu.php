@@ -1,3 +1,18 @@
+<?php
+$nealChatUnread = 0;
+try {
+    $nealChatBadgeDb = new PDO('sqlite:' . __DIR__ . '/../data/neal.db');
+    $nealChatBadgeDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $nealChatActorId = -(int)($_SESSION['admin_id'] ?? 0);
+    if ($nealChatActorId !== 0) {
+        $nealChatBadgeStmt = $nealChatBadgeDb->prepare('SELECT COUNT(*) FROM chat_messages WHERE recipient_id = ? AND read_at IS NULL');
+        $nealChatBadgeStmt->execute([$nealChatActorId]);
+        $nealChatUnread = (int)$nealChatBadgeStmt->fetchColumn();
+    }
+} catch (Throwable $e) {
+    $nealChatUnread = 0;
+}
+?>
 <nav class="neal-topnav" aria-label="منوی مدیریت">
 <style>
 .neal-topnav{direction:rtl;display:flex;align-items:center;gap:4px;width:100%;min-height:54px;padding:7px 22px;background:rgba(255,255,255,.96);border-bottom:1px solid #e7ebf0;box-shadow:0 1px 8px rgba(16,24,40,.04);position:relative;z-index:1000;font-family:Vazirmatn,Tahoma,sans-serif}
@@ -14,10 +29,11 @@
 .neal-nav-section{padding:7px 11px 4px;color:#98a2b3;font-size:9px;font-weight:700}
 .neal-nav-spacer{margin-right:auto}
 @media(max-width:800px){.neal-topnav{overflow-x:auto;justify-content:flex-start;padding:7px 12px}.neal-nav-dropdown{position:fixed;right:12px;top:62px}}
+.neal-chat-unread-badge{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 5px;margin-right:5px;border-radius:999px;background:#e02424;color:#fff;font-family:inherit;font-size:10px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;box-shadow:0 0 0 2px #fff;vertical-align:middle}.neal-chat-unread-badge[hidden]{display:none!important}.neal-chat-link{display:inline-flex!important;align-items:center}
 </style>
 <a class="neal-topnav-brand" href="index.php">NEAL <span>Proxy Manager</span></a>
 <a href="index.php">خانه</a>
-<a href="chat.php">💬 پیام‌رسان همکاران</a>
+<a class="neal-chat-link" href="chat.php">💬 پیام‌رسان همکاران<span class="neal-chat-unread-badge" data-unread-chat-badge aria-label="پیام خوانده‌نشده" <?php echo $nealChatUnread > 0 ? "" : "hidden"; ?>><?php echo $nealChatUnread > 99 ? "99+" : $nealChatUnread; ?></span></a>
 <div class="neal-nav-group">
 <button type="button">مدیریت اعلان‌ها⌄</button>
 <div class="neal-nav-dropdown">
@@ -53,3 +69,22 @@
 <div class="neal-nav-spacer"></div>
 <a href="announcements-list.php">📢 اطلاعیه‌ها</a>
 </nav>
+<script>
+(function(){
+    var badge=document.querySelector('[data-unread-chat-badge]');
+    if(!badge)return;
+    function refreshUnread(){
+        fetch('/neal/chat-unread.php',{credentials:'same-origin',cache:'no-store',headers:{'Accept':'application/json'}})
+        .then(function(response){if(!response.ok)throw new Error('Unread count unavailable');return response.json();})
+        .then(function(data){
+            if(!data || !data.ok)return;
+            var count=Number(data.unread_count)||0;
+            badge.textContent=count>99?'99+':String(count);
+            badge.hidden=count<1;
+            badge.setAttribute('aria-label',count+' پیام خوانده‌نشده');
+        }).catch(function(){});
+    }
+    refreshUnread();
+    window.setInterval(refreshUnread,10000);
+})();
+</script>
