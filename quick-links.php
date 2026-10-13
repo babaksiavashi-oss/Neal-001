@@ -32,9 +32,22 @@ function ql_csrf_ok($token) {
         && hash_equals($_SESSION['neal_quick_links_csrf'], $token);
 }
 function ql_valid_url($url) {
-    if (!filter_var($url, FILTER_VALIDATE_URL)) return false;
-    $scheme = strtolower((string)parse_url($url, PHP_URL_SCHEME));
-    return in_array($scheme, ['http', 'https'], true);
+    $url = trim((string)$url);
+    if ($url === '' || preg_match('/[\\s\\r\\n\\t]/', $url)) return false;
+
+    $parts = @parse_url($url);
+    if (!is_array($parts) || empty($parts['scheme']) || empty($parts['host'])) {
+        return false;
+    }
+
+    $scheme = strtolower((string)$parts['scheme']);
+    if ($scheme !== 'http' && $scheme !== 'https') return false;
+
+    // Reject malformed host values without relying on optional PHP filters.
+    $host = trim((string)$parts['host'], '[]');
+    if ($host === '' || strpos($host, '.') === false) return false;
+
+    return true;
 }
 
 $message = '';
@@ -54,7 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $description = trim((string)($_POST['description'] ?? ''));
             $category = trim((string)($_POST['category'] ?? 'عمومی'));
             $icon = trim((string)($_POST['icon'] ?? '🔗'));
-            $sortOrder = filter_var($_POST['sort_order'] ?? 0, FILTER_VALIDATE_INT);
+            $sortRaw = trim((string)($_POST['sort_order'] ?? '0'));
+            $sortOrder = ($sortRaw !== '' && preg_match('/^-?\\d+$/', $sortRaw)) ? (int)$sortRaw : false;
             $active = isset($_POST['is_active']) ? 1 : 0;
 
             if ($title === '' || mb_strlen($title) > 120) {
