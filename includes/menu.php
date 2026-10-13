@@ -17,6 +17,7 @@
 </style>
 <a class="neal-topnav-brand" href="index.php">NEAL <span>Proxy Manager</span></a>
 <a href="index.php">خانه</a>
+<a href="chat.php">💬 پیام‌رسان همکاران</a>
 <div class="neal-nav-group">
 <button type="button">مدیریت اعلان‌ها⌄</button>
 <div class="neal-nav-dropdown">
