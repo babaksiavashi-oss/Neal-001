@@ -31,7 +31,7 @@ if ($myId === 0) {
 try {
     $db = neal_chat_db();
     if ($isAdmin) {
-        $meStmt = $db->prepare('SELECT id, username, fullname, role, is_active FROM admins WHERE id = ? LIMIT 1');
+        $meStmt = $db->prepare('SELECT id, username, username AS fullname, role, is_active FROM admins WHERE id = ? LIMIT 1');
         $meStmt->execute([abs($myId)]);
     } else {
         $meStmt = $db->prepare('SELECT id, username, fullname, is_active FROM users WHERE id = ? LIMIT 1');
@@ -88,7 +88,7 @@ try {
             ];
         }
 
-        $adminsStmt = $db->prepare("SELECT id, username, COALESCE(NULLIF(TRIM(fullname), ''), username, 'بدون نام') AS fullname, COALESCE(role, 'admin') AS role FROM admins WHERE is_active=1");
+        $adminsStmt = $db->prepare("SELECT id, username, username AS fullname, COALESCE(role, 'admin') AS role FROM admins WHERE is_active=1");
         $adminsStmt->execute();
         foreach ($adminsStmt->fetchAll() as $row) {
             $id = -(int)$row['id'];
