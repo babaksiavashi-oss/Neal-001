@@ -4,7 +4,9 @@ declare(strict_types=1);
 require_once __DIR__ . '/auth/auth.php';
 require_once __DIR__ . '/includes/chat-common.php';
 
-if (!is_user_logged_in()) {
+$isAdmin = is_admin_logged_in();
+$isUser = is_user_logged_in();
+if (!$isAdmin && !$isUser) {
     neal_chat_json(['ok' => false, 'error' => 'برای استفاده از پیام‌رسان ابتدا وارد حساب کاربری شوید.'], 401);
 }
 
@@ -19,15 +21,22 @@ if ($token === '' || $postedToken === '' || !hash_equals($token, $postedToken)) 
     neal_chat_json(['ok' => false, 'error' => 'نشست امنیتی منقضی شده است؛ صفحه را تازه‌سازی کنید.'], 403);
 }
 
-$myId = (int)($_SESSION['user_id'] ?? 0);
-if ($myId <= 0) {
+// Users use positive IDs; administrators/IT experts use negative IDs.
+// This keeps IDs unique without changing or losing existing user-to-user messages.
+$myId = $isAdmin ? -(int)($_SESSION['admin_id'] ?? 0) : (int)($_SESSION['user_id'] ?? 0);
+if ($myId === 0) {
     neal_chat_json(['ok' => false, 'error' => 'حساب کاربری معتبر نیست.'], 401);
 }
 
 try {
     $db = neal_chat_db();
-    $meStmt = $db->prepare('SELECT id, username, fullname, is_active FROM users WHERE id = ? LIMIT 1');
-    $meStmt->execute([$myId]);
+    if ($isAdmin) {
+        $meStmt = $db->prepare('SELECT id, username, fullname, role, is_active FROM admins WHERE id = ? LIMIT 1');
+        $meStmt->execute([abs($myId)]);
+    } else {
+        $meStmt = $db->prepare('SELECT id, username, fullname, is_active FROM users WHERE id = ? LIMIT 1');
+        $meStmt->execute([$myId]);
+    }
     $me = $meStmt->fetch();
     if (!$me || (int)$me['is_active'] !== 1) {
         neal_chat_json(['ok' => false, 'error' => 'حساب کاربری غیرفعال است.'], 403);
@@ -35,18 +44,28 @@ try {
 
     $now = time();
     neal_chat_cleanup_expired($db);
-    $presence = $db->prepare('INSERT INTO chat_presence(user_id, last_seen) VALUES(?, ?) ON CONFLICT(user_id) DO UPDATE SET last_seen=excluded.last_seen');
+    $presence = $db->prepare('INSERT INTO chat_presence_all(actor_id, last_seen) VALUES(?, ?) ON CONFLICT(actor_id) DO UPDATE SET last_seen=excluded.last_seen');
     $presence->execute([$myId, $now]);
 
     $action = (string)($_POST['action'] ?? '');
 
     $getPeer = static function (PDO $db, int $peerId, int $myId): array {
-        if ($peerId <= 0 || $peerId === $myId) {
+        if ($peerId === 0 || $peerId === $myId) {
             neal_chat_json(['ok' => false, 'error' => 'همکار انتخاب‌شده معتبر نیست.'], 400);
         }
-        $stmt = $db->prepare('SELECT id, username, fullname, is_active, COALESCE(NULLIF(avatar, \'\'), \'default\') AS avatar, COALESCE(user_status, \'\') AS user_status FROM users WHERE id=? AND is_active=1 LIMIT 1');
-        $stmt->execute([$peerId]);
-        $peer = $stmt->fetch();
+        if ($peerId < 0) {
+            $stmt = $db->prepare("SELECT id, username, fullname, role, is_active, 'default' AS avatar, '' AS user_status FROM admins WHERE id=? AND is_active=1 LIMIT 1");
+            $stmt->execute([abs($peerId)]);
+            $peer = $stmt->fetch();
+            if ($peer) {
+                $peer['id'] = -abs((int)$peer['id']);
+                $peer['user_status'] = 'مدیریت / کارشناس فناوری اطلاعات';
+            }
+        } else {
+            $stmt = $db->prepare("SELECT id, username, fullname, is_active, COALESCE(NULLIF(avatar, ''), 'default') AS avatar, COALESCE(user_status, '') AS user_status FROM users WHERE id=? AND is_active=1 LIMIT 1");
+            $stmt->execute([$peerId]);
+            $peer = $stmt->fetch();
+        }
         if (!$peer) {
             neal_chat_json(['ok' => false, 'error' => 'این همکار فعال نیست یا وجود ندارد.'], 404);
         }
@@ -54,54 +73,60 @@ try {
     };
 
     if ($action === 'contacts') {
-        $stmt = $db->prepare("
-            SELECT
-                u.id,
-                u.username,
-                COALESCE(NULLIF(TRIM(u.fullname), ''), u.username, 'بدون نام') AS fullname,
-                COALESCE(NULLIF(u.avatar, ''), 'default') AS avatar,
-                COALESCE(u.user_status, '') AS user_status,
-                (SELECT p.last_seen FROM chat_presence p WHERE p.user_id = u.id LIMIT 1) AS last_seen,
-                (SELECT m.body FROM chat_messages m
-                    WHERE (m.sender_id = :me1 AND m.recipient_id = u.id)
-                       OR (m.sender_id = u.id AND m.recipient_id = :me2)
-                    ORDER BY m.id DESC LIMIT 1) AS last_body,
-                (SELECT m.id FROM chat_messages m
-                    WHERE (m.sender_id = :me3 AND m.recipient_id = u.id)
-                       OR (m.sender_id = u.id AND m.recipient_id = :me4)
-                    ORDER BY m.id DESC LIMIT 1) AS last_id,
-                (SELECT m.created_at FROM chat_messages m
-                    WHERE (m.sender_id = :me5 AND m.recipient_id = u.id)
-                       OR (m.sender_id = u.id AND m.recipient_id = :me6)
-                    ORDER BY m.id DESC LIMIT 1) AS last_at,
-                (SELECT COUNT(*) FROM chat_messages m
-                    WHERE m.sender_id = u.id AND m.recipient_id = :me7 AND m.read_at IS NULL) AS unread_count
-            FROM users u
-            WHERE u.is_active = 1 AND u.id <> :me8
-            ORDER BY fullname COLLATE NOCASE ASC, u.id ASC
-        ");
-        $stmt->execute([
-            ':me1' => $myId, ':me2' => $myId, ':me3' => $myId, ':me4' => $myId,
-            ':me5' => $myId, ':me6' => $myId, ':me7' => $myId, ':me8' => $myId
-        ]);
-        $contacts = [];
-        foreach ($stmt->fetchAll() as $row) {
-            $avatar = neal_avatar_url((string)$row['avatar']);
-            $lastSeen = (int)($row['last_seen'] ?? 0);
-            $contacts[] = [
-                'id' => (int)$row['id'],
+        $people = [];
+        $usersStmt = $db->prepare("SELECT id, username, COALESCE(NULLIF(TRIM(fullname), ''), username, 'بدون نام') AS fullname, COALESCE(NULLIF(avatar, ''), 'default') AS avatar, COALESCE(user_status, '') AS user_status FROM users WHERE is_active=1");
+        $usersStmt->execute();
+        foreach ($usersStmt->fetchAll() as $row) {
+            $id = (int)$row['id'];
+            if ($id === $myId) continue;
+            $people[] = [
+                'id' => $id,
                 'username' => (string)$row['username'],
                 'fullname' => (string)$row['fullname'],
-                'avatar' => '/neal/' . ltrim($avatar, '/'),
-                'user_status' => (string)$row['user_status'],
-                'online' => $lastSeen >= ($now - 90),
-                'last_body' => ((string)($row['last_body'] ?? '') !== '' ? (string)$row['last_body'] : (!empty($row['last_id']) ? '📎 فایل پیوست' : '')),
-                'last_id' => (int)($row['last_id'] ?? 0),
-                'last_at' => (string)($row['last_at'] ?? ''),
-                'unread_count' => (int)$row['unread_count']
+                'avatar' => '/neal/' . ltrim(neal_avatar_url((string)$row['avatar']), '/'),
+                'user_status' => (string)$row['user_status']
             ];
         }
-        neal_chat_json(['ok' => true, 'contacts' => $contacts, 'server_time' => $now]);
+
+        $adminsStmt = $db->prepare("SELECT id, username, COALESCE(NULLIF(TRIM(fullname), ''), username, 'بدون نام') AS fullname, COALESCE(role, 'admin') AS role FROM admins WHERE is_active=1");
+        $adminsStmt->execute();
+        foreach ($adminsStmt->fetchAll() as $row) {
+            $id = -(int)$row['id'];
+            if ($id === $myId) continue;
+            $roleLabel = ['expert' => 'کارشناس فناوری اطلاعات', 'manager' => 'مدیریت', 'admin' => 'مدیر سامانه'];
+            $people[] = [
+                'id' => $id,
+                'username' => (string)$row['username'],
+                'fullname' => (string)$row['fullname'],
+                'avatar' => '/neal/images/avatars/default.svg',
+                'user_status' => $roleLabel[(string)$row['role']] ?? 'مدیریت / کارشناس فناوری اطلاعات'
+            ];
+        }
+
+        $lastStmt = $db->prepare("SELECT id, body, created_at FROM chat_messages WHERE (sender_id=? AND recipient_id=?) OR (sender_id=? AND recipient_id=?) ORDER BY id DESC LIMIT 1");
+        $countStmt = $db->prepare("SELECT COUNT(*) FROM chat_messages WHERE (sender_id=? AND recipient_id=?) OR (sender_id=? AND recipient_id=?)");
+        $unreadStmt = $db->prepare("SELECT COUNT(*) FROM chat_messages WHERE sender_id=? AND recipient_id=? AND read_at IS NULL");
+        $presenceStmt = $db->prepare('SELECT last_seen FROM chat_presence_all WHERE actor_id=? LIMIT 1');
+
+        foreach ($people as &$person) {
+            $peerId = (int)$person['id'];
+            $lastStmt->execute([$myId, $peerId, $peerId, $myId]);
+            $last = $lastStmt->fetch();
+            $countStmt->execute([$myId, $peerId, $peerId, $myId]);
+            $messageCount = (int)$countStmt->fetchColumn();
+            $unreadStmt->execute([$peerId, $myId]);
+            $unreadCount = (int)$unreadStmt->fetchColumn();
+            $presenceStmt->execute([$peerId]);
+            $lastSeen = (int)($presenceStmt->fetchColumn() ?: 0);
+            $person['online'] = $lastSeen >= ($now - 90);
+            $person['last_body'] = $last ? ((string)$last['body'] !== '' ? (string)$last['body'] : '📎 فایل پیوست') : '';
+            $person['last_id'] = (int)($last['id'] ?? 0);
+            $person['last_at'] = (string)($last['created_at'] ?? '');
+            $person['message_count'] = $messageCount;
+            $person['unread_count'] = $unreadCount;
+        }
+        unset($person);
+        neal_chat_json(['ok' => true, 'contacts' => $people, 'server_time' => $now]);
     }
 
     if ($action === 'messages') {
@@ -114,15 +139,13 @@ try {
         $read->execute([$now, $peerId, $myId]);
 
         $baseSelect = "
-            SELECT
-                m.id, m.sender_id, m.recipient_id, m.body, m.created_at, m.read_at,
+            SELECT m.id, m.sender_id, m.recipient_id, m.body, m.created_at, m.read_at,
                 a.id AS attachment_id, a.original_name, a.mime_type, a.file_size,
                 a.expires_at, a.stored_name, a.deleted_at
             FROM chat_messages m
             LEFT JOIN chat_attachments a ON a.message_id = m.id
             WHERE ((m.sender_id = ? AND m.recipient_id = ?) OR (m.sender_id = ? AND m.recipient_id = ?))
         ";
-        $hasOlder = false;
         if ($beforeId > 0) {
             $stmt = $db->prepare($baseSelect . ' AND m.id < ? ORDER BY m.id DESC LIMIT 101');
             $stmt->execute([$myId, $peerId, $peerId, $myId, $beforeId]);
@@ -134,6 +157,7 @@ try {
             $stmt = $db->prepare($baseSelect . ' AND m.id > ? ORDER BY m.id ASC LIMIT 100');
             $stmt->execute([$myId, $peerId, $peerId, $myId, $afterId]);
             $rows = $stmt->fetchAll();
+            $hasOlder = false;
         } else {
             $stmt = $db->prepare($baseSelect . ' ORDER BY m.id DESC LIMIT 101');
             $stmt->execute([$myId, $peerId, $peerId, $myId]);
@@ -174,8 +198,8 @@ try {
                 'id' => (int)$peer['id'],
                 'username' => (string)$peer['username'],
                 'fullname' => (string)($peer['fullname'] ?: $peer['username']),
-                'avatar' => '/neal/' . ltrim(neal_avatar_url((string)$peer['avatar']), '/'),
-                'user_status' => (string)$peer['user_status']
+                'avatar' => ((int)$peer['id'] < 0) ? '/neal/images/avatars/default.svg' : '/neal/' . ltrim(neal_avatar_url((string)$peer['avatar']), '/'),
+                'user_status' => (string)($peer['user_status'] ?? '')
             ],
             'messages' => $messages,
             'has_older' => $hasOlder,
@@ -187,12 +211,8 @@ try {
         $peerId = (int)($_POST['peer_id'] ?? 0);
         $getPeer($db, $peerId, $myId);
         $body = trim((string)($_POST['body'] ?? ''));
-        if ($body === '') {
-            neal_chat_json(['ok' => false, 'error' => 'متن پیام خالی است.'], 400);
-        }
-        if (neal_chat_text_length($body) > 2000) {
-            neal_chat_json(['ok' => false, 'error' => 'حداکثر طول پیام ۲۰۰۰ نویسه است.'], 400);
-        }
+        if ($body === '') neal_chat_json(['ok' => false, 'error' => 'متن پیام خالی است.'], 400);
+        if (neal_chat_text_length($body) > 2000) neal_chat_json(['ok' => false, 'error' => 'حداکثر طول پیام ۲۰۰۰ نویسه است.'], 400);
         $stmt = $db->prepare('INSERT INTO chat_messages(sender_id, recipient_id, body) VALUES(?, ?, ?)');
         $stmt->execute([$myId, $peerId, $body]);
         neal_chat_json(['ok' => true, 'message_id' => (int)$db->lastInsertId()]);
