@@ -1,20 +1,26 @@
 <?php
 declare(strict_types=1);
 
-$portal_mode = true;
 require_once __DIR__ . '/auth/auth.php';
 require_once __DIR__ . '/includes/chat-common.php';
 
-if (!is_user_logged_in()) {
+$isAdmin = is_admin_logged_in();
+$isUser = is_user_logged_in();
+if (!$isAdmin && !$isUser) {
     header('Location: /neal/login.php');
     exit;
 }
-
-$myId = (int)($_SESSION['user_id'] ?? 0);
+$portal_mode = !$isAdmin;
+$myId = $isAdmin ? -(int)($_SESSION['admin_id'] ?? 0) : (int)($_SESSION['user_id'] ?? 0);
 $db = neal_chat_db();
 neal_chat_cleanup_expired($db);
-$userStmt = $db->prepare('SELECT id, username, fullname, is_active FROM users WHERE id=? LIMIT 1');
-$userStmt->execute([$myId]);
+if ($isAdmin) {
+    $userStmt = $db->prepare('SELECT id, username, fullname, is_active FROM admins WHERE id=? LIMIT 1');
+    $userStmt->execute([abs($myId)]);
+} else {
+    $userStmt = $db->prepare('SELECT id, username, fullname, is_active FROM users WHERE id=? LIMIT 1');
+    $userStmt->execute([$myId]);
+}
 $currentUser = $userStmt->fetch();
 if (!$currentUser || (int)$currentUser['is_active'] !== 1) {
     header('Location: /neal/login.php');
@@ -54,9 +60,10 @@ $page_css = '/neal/css/chat.css';
                 <input type="search" id="chatContactSearch" placeholder="جست‌وجوی نام یا نام کاربری" autocomplete="off">
                 <kbd>/</kbd>
             </label>
-            <div class="chat-contact-filter">
-                <button type="button" class="is-active" data-filter="all">همه</button>
-                <button type="button" data-filter="online">آنلاین</button>
+            <div class="chat-contact-filter" role="tablist" aria-label="دسته‌بندی همکاران">
+                <button type="button" class="is-active" data-filter="recent" role="tab" aria-selected="true">چت‌های اخیر</button>
+                <button type="button" data-filter="online" role="tab" aria-selected="false">آنلاین‌ها</button>
+                <button type="button" data-filter="all" role="tab" aria-selected="false">همه همکاران</button>
             </div>
             <div class="chat-contact-list" id="chatContactList">
                 <div class="chat-loading"><span class="chat-spinner"></span> در حال بارگذاری همکاران…</div>
@@ -103,20 +110,26 @@ $page_css = '/neal/css/chat.css';
 
                 <div class="chat-composer-wrap">
                     <div class="chat-picker-panel" id="chatEmojiPanel" hidden aria-label="انتخاب ایموجی">
-                        <button type="button" data-emoji="😊">😊</button><button type="button" data-emoji="😂">😂</button>
-                        <button type="button" data-emoji="😍">😍</button><button type="button" data-emoji="❤️">❤️</button>
-                        <button type="button" data-emoji="👍">👍</button><button type="button" data-emoji="🙏">🙏</button>
-                        <button type="button" data-emoji="👏">👏</button><button type="button" data-emoji="🎉">🎉</button>
-                        <button type="button" data-emoji="🤔">🤔</button><button type="button" data-emoji="🔥">🔥</button>
-                        <button type="button" data-emoji="🌷">🌷</button><button type="button" data-emoji="💪">💪</button>
+                        <button type="button" data-emoji="😀">😀</button><button type="button" data-emoji="😃">😃</button><button type="button" data-emoji="😊">😊</button><button type="button" data-emoji="😂">😂</button><button type="button" data-emoji="🤣">🤣</button>
+                        <button type="button" data-emoji="😉">😉</button><button type="button" data-emoji="😍">😍</button><button type="button" data-emoji="🥰">🥰</button><button type="button" data-emoji="😘">😘</button><button type="button" data-emoji="😎">😎</button>
+                        <button type="button" data-emoji="🤔">🤔</button><button type="button" data-emoji="🤗">🤗</button><button type="button" data-emoji="😅">😅</button><button type="button" data-emoji="😭">😭</button><button type="button" data-emoji="😴">😴</button>
+                        <button type="button" data-emoji="👍">👍</button><button type="button" data-emoji="👎">👎</button><button type="button" data-emoji="👏">👏</button><button type="button" data-emoji="🙏">🙏</button><button type="button" data-emoji="💪">💪</button>
+                        <button type="button" data-emoji="❤️">❤️</button><button type="button" data-emoji="💙">💙</button><button type="button" data-emoji="🔥">🔥</button><button type="button" data-emoji="🎉">🎉</button><button type="button" data-emoji="🌹">🌹</button>
+                        <button type="button" data-emoji="🌷">🌷</button><button type="button" data-emoji="☕">☕</button><button type="button" data-emoji="✅">✅</button><button type="button" data-emoji="💡">💡</button><button type="button" data-emoji="🙏">🙏</button>
                     </div>
                     <div class="chat-picker-panel chat-sticker-panel" id="chatStickerPanel" hidden aria-label="استیکرهای متنی">
+                        <button type="button" data-sticker="👋 سلام، وقت بخیر"><span>👋</span><small>سلام، وقت بخیر</small></button>
                         <button type="button" data-sticker="🌷 روزت بخیر"><span>🌷</span><small>روزت بخیر</small></button>
-                        <button type="button" data-sticker="👏 عالی بود"><span>👏</span><small>عالی بود</small></button>
+                        <button type="button" data-sticker="👏 عالی بود!"><span>👏</span><small>عالی بود!</small></button>
                         <button type="button" data-sticker="🙏 ممنونم"><span>🙏</span><small>ممنونم</small></button>
-                        <button type="button" data-sticker="🎉 تبریک می‌گم"><span>🎉</span><small>تبریک</small></button>
+                        <button type="button" data-sticker="🎉 تبریک می‌گم"><span>🎉</span><small>تبریک می‌گم</small></button>
                         <button type="button" data-sticker="💪 خسته نباشی"><span>💪</span><small>خسته نباشی</small></button>
-                        <button type="button" data-sticker="☕ وقت استراحته"><span>☕</span><small>استراحت</small></button>
+                        <button type="button" data-sticker="☕ وقت استراحته"><span>☕</span><small>وقت استراحته</small></button>
+                        <button type="button" data-sticker="✅ انجام شد"><span>✅</span><small>انجام شد</small></button>
+                        <button type="button" data-sticker="🤝 حتماً، در خدمتم"><span>🤝</span><small>در خدمتم</small></button>
+                        <button type="button" data-sticker="💡 پیشنهاد خوبیه"><span>💡</span><small>پیشنهاد خوب</small></button>
+                        <button type="button" data-sticker="😊 روز خوبی داشته باشی"><span>😊</span><small>روز خوبی داشته باشی</small></button>
+                        <button type="button" data-sticker="🚀 بزن بریم!"><span>🚀</span><small>بزن بریم!</small></button>
                     </div>
                     <form class="chat-composer" id="chatComposer">
                         <button type="button" class="chat-tool-button" id="chatEmojiButton" title="ایموجی" aria-label="انتخاب ایموجی">☺</button>
@@ -158,7 +171,7 @@ $page_css = '/neal/css/chat.css';
     let contacts = [];
     let activePeer = null;
     let lastMessageId = 0;
-    let currentFilter = 'all';
+    let currentFilter = 'recent';
     let messageBusy = false;
     let toastTimer = null;
 
@@ -212,13 +225,28 @@ $page_css = '/neal/css/chat.css';
     function renderContacts() {
         const term = search.value.trim().toLocaleLowerCase();
         list.replaceChildren();
-        const filtered = contacts.filter(function (contact) {
+        let filtered = contacts.filter(function (contact) {
             const matchesText = (contact.fullname + ' ' + contact.username + ' ' + contact.user_status).toLocaleLowerCase().includes(term);
-            return matchesText && (currentFilter !== 'online' || contact.online);
+            if (!matchesText) return false;
+            if (currentFilter === 'online') return !!contact.online;
+            if (currentFilter === 'recent') return Number(contact.last_id) > 0;
+            return true;
         });
+        if (currentFilter === 'recent') {
+            filtered.sort(function (a, b) {
+                return String(b.last_at || '').localeCompare(String(a.last_at || '')) || Number(b.last_id || 0) - Number(a.last_id || 0);
+            });
+        } else {
+            filtered.sort(function (a, b) {
+                return String(a.fullname || '').localeCompare(String(b.fullname || ''), 'fa') || String(a.username || '').localeCompare(String(b.username || ''));
+            });
+        }
         count.textContent = contacts.length.toLocaleString('fa-IR') + ' همکار فعال';
         if (!filtered.length) {
-            list.appendChild(make('div', 'chat-no-contacts', term ? 'همکاری با این مشخصات پیدا نشد.' : (currentFilter === 'online' ? 'در حال حاضر همکاری آنلاین نیست.' : 'همکار فعالی برای نمایش وجود ندارد.')));
+            const emptyText = term ? 'همکاری با این مشخصات پیدا نشد.' :
+                (currentFilter === 'recent' ? 'هنوز گفت‌وگویی ندارید؛ از «همه همکاران» یک نفر را انتخاب کنید.' :
+                (currentFilter === 'online' ? 'در حال حاضر همکاری آنلاین نیست.' : 'همکار فعالی برای نمایش وجود ندارد.'));
+            list.appendChild(make('div', 'chat-no-contacts', emptyText));
             return;
         }
         filtered.forEach(function (contact) {
@@ -241,7 +269,11 @@ $page_css = '/neal/css/chat.css';
             details.appendChild(make('span', 'chat-contact-preview', contact.last_body || (contact.user_status || '@' + contact.username)));
             item.appendChild(avatarWrap);
             item.appendChild(details);
-            if (contact.unread_count > 0) item.appendChild(make('span', 'chat-unread-count', contact.unread_count > 99 ? '99+' : String(contact.unread_count)));
+            if (Number(contact.unread_count) > 0) {
+                item.appendChild(make('span', 'chat-unread-count', Number(contact.unread_count) > 99 ? '99+' : String(contact.unread_count)));
+            } else if (Number(contact.message_count) > 0) {
+                item.appendChild(make('span', 'chat-read-count', Number(contact.message_count) > 99 ? '99+' : String(contact.message_count)));
+            }
             list.appendChild(item);
         });
     }
@@ -505,8 +537,12 @@ $page_css = '/neal/css/chat.css';
     search.addEventListener('input', renderContacts);
     document.querySelectorAll('[data-filter]').forEach(function (button) {
         button.addEventListener('click', function () {
-            currentFilter = button.dataset.filter || 'all';
-            document.querySelectorAll('[data-filter]').forEach(function (b) { b.classList.toggle('is-active', b === button); });
+            currentFilter = button.dataset.filter || 'recent';
+            document.querySelectorAll('[data-filter]').forEach(function (b) {
+                const selected = b === button;
+                b.classList.toggle('is-active', selected);
+                b.setAttribute('aria-selected', selected ? 'true' : 'false');
+            });
             renderContacts();
         });
     });
