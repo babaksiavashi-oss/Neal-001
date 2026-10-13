@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#061321">
+<title>NealPharmed | سامانه مدیریت درخواست‌ها</title>
+<style>
+@font-face{font-family:Vazirmatn;src:url('/neal/fonts/Vazirmatn-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:Vazirmatn;src:url('/neal/fonts/Vazirmatn-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:Vazirmatn;src:url('/neal/fonts/Vazirmatn-SemiBold.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:Vazirmatn;src:url('/neal/fonts/Vazirmatn-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Vazirmatn,Tahoma,sans-serif;background:#061321;color:#f3f8ff}
+body{min-height:100vh;overflow:hidden;background:radial-gradient(ellipse at 50% 37%,#123a55 0%,#091d30 39%,#050d18 80%)}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(#7bcbd00b 1px,transparent 1px),linear-gradient(90deg,#7bcbd00b 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(transparent,#000 15%,#000 85%,transparent);animation:gridmove 22s linear infinite}
+.aurora{position:fixed;inset:-30%;pointer-events:none;background:conic-gradient(from 0deg at 50% 50%,transparent 0 18%,#00e5d515 24%,transparent 31% 48%,#3787ff17 57%,transparent 67%);filter:blur(35px);animation:aurora 18s linear infinite}
+main{position:relative;z-index:1;width:min(900px,92vw);height:100vh;min-height:520px;margin:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 0}
+.top{position:absolute;top:27px;right:0;left:0;display:flex;justify-content:space-between;align-items:center;color:#b8cce0;font-size:12px}
+.status{display:inline-flex;align-items:center;gap:8px;border:1px solid #59e4d52c;background:#6cebd20c;border-radius:30px;padding:8px 13px}
+.status i{width:7px;height:7px;border-radius:50%;background:#54e7b3;box-shadow:0 0 12px #54e7b3;animation:pulse 1.7s infinite}
+.hero{position:relative;width:min(350px,72vw);aspect-ratio:1;display:grid;place-items:center;margin:-5px auto 4px;isolation:isolate}
+.halo{position:absolute;inset:13%;border-radius:50%;background:radial-gradient(circle,#36d8dd21 0,#2875b514 42%,transparent 70%);filter:blur(12px);animation:halopulse 3s ease-in-out infinite}
+.ring{position:absolute;border-radius:50%;border:1px solid transparent;pointer-events:none}
+.ring.one{inset:8%;border-top-color:#64f6e4;border-right-color:#64f6e45c;border-bottom-color:#3d8cff70;box-shadow:0 0 18px #30dfdc20;animation:spin 8s linear infinite}
+.ring.two{inset:2%;border-left:1px solid #64d9ff9c;border-bottom:1px dashed #64d9ff8c;border-right:1px solid #4c83ff85;animation:spinback 13s linear infinite}
+.ring.three{inset:17%;border:1px dashed #75c9ff55;animation:spin 23s linear infinite}
+.ring.four{inset:0;border:1px solid #5bdedb17;animation:halopulse 4s ease-in-out infinite}
+.ring.one:before,.ring.two:before,.ring.two:after{content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:#8afff2;box-shadow:0 0 8px #5cf5e9,0 0 22px #5cf5e9;top:17%;left:12%}
+.ring.two:before{width:6px;height:6px;background:#77aaff;box-shadow:0 0 16px #77aaff;top:73%;left:5%}
+.ring.two:after{top:20%;left:auto;right:3%;width:5px;height:5px;background:#fff}
+.orbit{position:absolute;inset:0;border-radius:50%;animation:spin 10s linear infinite}
+.orbit b{position:absolute;top:9%;left:50%;width:32px;height:32px;transform:translateX(-50%);display:grid;place-items:center;border-radius:12px;color:#bafff7;border:1px solid #65e8e65c;background:#0d2b40d9;box-shadow:0 0 22px #3ce1d51b;font-size:14px}
+.orbit.two{inset:7%;animation:spinback 15s linear infinite}
+.orbit.two b{top:auto;left:auto;bottom:9%;right:5%;width:28px;height:28px;border-radius:50%;font-size:12px;color:#a8caff;border-color:#73aaff65}
+.orbit.three{inset:18%;animation:spin 21s linear infinite}
+.orbit.three b{top:46%;left:-4%;width:24px;height:24px;border-radius:8px;font-size:10px}
+.logo-shell{position:relative;width:52%;aspect-ratio:1;display:grid;place-items:center;animation:logoenter 1.25s cubic-bezier(.2,.8,.2,1) both,levitate 4s ease-in-out 1.25s infinite;z-index:3}
+.logo-shell:before{content:"";position:absolute;inset:-10%;border-radius:35%;background:linear-gradient(135deg,#5bf3e51c,#448aff16);filter:blur(9px);animation:halopulse 2.7s ease-in-out infinite}
+.logo-shell:after{content:"";position:absolute;inset:-3%;border:1px solid #b3fff348;border-radius:31%;box-shadow:inset 0 0 22px #52d9dc13,0 0 30px #35d7d719;animation:borderglow 3s ease-in-out infinite}
+.logo-shell img{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 12px #54e7e044) drop-shadow(0 0 35px #4d9fff35)}
+.spark{position:absolute;width:3px;height:3px;background:#c4fff9;border-radius:50%;box-shadow:0 0 10px 2px #4de7e4;animation:sparkle 2.8s ease-in-out infinite}
+.s1{top:20%;left:22%;animation-delay:.2s}.s2{top:35%;right:12%;animation-delay:1s}.s3{bottom:19%;left:26%;animation-delay:1.6s}.s4{bottom:29%;right:20%;animation-delay:.7s}.s5{top:11%;right:34%;animation-delay:2s}.s6{bottom:10%;left:48%;animation-delay:1.3s}
+h1{font-size:clamp(34px,6vw,56px);font-weight:700;letter-spacing:-1.5px;margin:4px 0 0;direction:ltr;line-height:1.2;background:linear-gradient(100deg,#fff 10%,#a7fff2 46%,#8db7ff 85%);background-clip:text;-webkit-background-clip:text;color:transparent;animation:titlein .8s .15s both}
+.subtitle{margin:13px 0 0;font-size:clamp(16px,2.5vw,22px);font-weight:500;color:#e2f2ff;animation:fadeup .8s .3s both}
+.progress{width:min(260px,68vw);margin:35px auto 0;animation:fadeup .7s .4s both}
+.track{height:3px;background:#c5eaff19;border-radius:10px;overflow:hidden}
+.track span{display:block;height:100%;width:0;border-radius:10px;background:linear-gradient(90deg,#448cff,#54eee0);box-shadow:0 0 14px #54eee0;animation:load 3s linear forwards}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes spinback{to{transform:rotate(-360deg)}}@keyframes aurora{to{transform:rotate(360deg)}}@keyframes gridmove{to{background-position:42px 42px}}@keyframes pulse{50%{opacity:.45;box-shadow:0 0 3px #54e7b3}}@keyframes halopulse{0%,100%{opacity:.55;transform:scale(.98)}50%{opacity:1;transform:scale(1.035)}}@keyframes logoenter{from{opacity:0;transform:scale(.55) rotate(-18deg);filter:blur(8px)}to{opacity:1;transform:scale(1) rotate(0);filter:blur(0)}}@keyframes levitate{0%,100%{translate:0 0}50%{translate:0 -7px}}@keyframes borderglow{0%,100%{box-shadow:inset 0 0 15px #52d9dc0c,0 0 18px #35d7d710}50%{box-shadow:inset 0 0 28px #52d9dc22,0 0 36px #35d7d72a}}@keyframes sparkle{0%,100%{opacity:.2;transform:scale(.6)}50%{opacity:1;transform:scale(1.8)}}@keyframes titlein{from{opacity:0;transform:translateY(12px);letter-spacing:4px}to{opacity:1;transform:translateY(0);letter-spacing:-1.5px}}@keyframes fadeup{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}@keyframes load{from{width:0}to{width:100%}}
+@media(max-width:520px){.top{top:15px;font-size:10px}.hero{width:min(300px,70vw)}main{min-height:480px}.subtitle{padding:0 10px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+</style>
+<script>
+window.setTimeout(function(){ window.location.replace('/neal/login.php'); }, 3000);
+</script>
+</head>
+<body>
+<div class="aurora" aria-hidden="true"></div>
+<main>
+  <div class="top"><span>NEAL PHARMED · فناوری اطلاعات</span><span class="status"><i></i> سامانه خدمات سازمانی</span></div>
+  <section class="hero" aria-label="لوگوی متحرک نیل فارمد">
+    <div class="halo"></div><div class="ring one"></div><div class="ring two"></div><div class="ring three"></div><div class="ring four"></div>
+    <div class="orbit"><b>✦</b></div><div class="orbit two"><b>✓</b></div><div class="orbit three"><b>+</b></div>
+    <div class="logo-shell"><img src="/neal/images/logo.png" alt="لوگوی نیل فارمد"></div>
+    <i class="spark s1"></i><i class="spark s2"></i><i class="spark s3"></i><i class="spark s4"></i><i class="spark s5"></i><i class="spark s6"></i>
+  </section>
+  <h1>NealPharmed</h1>
+  <p class="subtitle">سامانه مدیریت درخواست‌ها و خدمات فناوری اطلاعات</p>
+  <div class="progress" role="progressbar" aria-label="انتقال به صفحه ورود" aria-valuemin="0" aria-valuemax="100"><div class="track"><span></span></div></div>
+</main>
+</body>
+</html>
