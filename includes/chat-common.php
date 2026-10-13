@@ -43,6 +43,15 @@ function neal_chat_ensure_schema(PDO $db): void {
         )
     ");
     $db->exec('CREATE INDEX IF NOT EXISTS idx_chat_attachments_expiry ON chat_attachments(expires_at, stored_name)');
+    // Signed actor IDs: users are positive; admins/IT experts are negative.
+    // Keep legacy chat_presence untouched for backward compatibility.
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS chat_presence_all (
+            actor_id INTEGER PRIMARY KEY,
+            last_seen INTEGER NOT NULL
+        )
+    ");
+
     $db->exec("
         CREATE TABLE IF NOT EXISTS chat_presence (
             user_id INTEGER PRIMARY KEY,
