@@ -204,6 +204,7 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 .info-card{min-height:0}.info-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}.info-title{display:flex;align-items:center;gap:9px}.info-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#eef4ff;color:#3159a6}.info-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.info-title strong{display:block;font-size:13px;color:#101828}.info-title small{display:block;color:#98a2b3;font-size:9px;margin-top:2px}.info-count{font-size:9px;color:#667085;background:#f2f4f7;border-radius:999px;padding:5px 8px}
 .message-stage{position:relative;min-height:118px}.public-message{display:none;align-items:center;gap:12px;opacity:0;transform:translateY(5px);transition:opacity .35s ease,transform .35s ease}.public-message.active{display:flex;opacity:1;transform:translateY(0)}.message-avatar{width:58px;height:58px;min-width:58px;border-radius:16px;overflow:hidden;background:#f2f4f7;border:1px solid #eaecf0}.message-avatar img{width:100%;height:100%;object-fit:cover}.message-content{min-width:0}.message-content p{margin:0;color:#344054;font-size:11px;line-height:2;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.message-person{display:flex;align-items:center;gap:5px;margin-top:8px;color:#667085;font-size:9px}.message-person strong{color:#344054;font-size:10px}.message-date{color:#98a2b3}
 .message-progress{height:3px;border-radius:99px;background:#edf2f7;overflow:hidden;margin-top:9px}.message-progress span{display:block;height:100%;width:0;background:#5b7fbd;transition:width linear}
+.carousel-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;direction:ltr}.carousel-arrow{width:29px;height:27px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #e4e7ec;border-radius:8px;background:#fff;color:#475467;cursor:pointer;transition:background .18s,border-color .18s,color .18s,transform .18s;padding:0}.carousel-arrow:hover:not(:disabled){background:#eef4ff;border-color:#c7d7f3;color:#3159a6;transform:translateY(-1px)}.carousel-arrow:focus-visible{outline:2px solid #84a9e8;outline-offset:2px}.carousel-arrow:disabled{opacity:.35;cursor:default}.carousel-arrow svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.carousel-position{font-size:9px;color:#98a2b3;direction:rtl;font-variant-numeric:tabular-nums}
 .message-empty{min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#98a2b3;gap:6px}.message-empty svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.message-empty strong{font-size:10px;color:#667085}.message-empty span{font-size:9px}
 .announcement-stage,.occasion-stage{position:relative;min-height:118px}.announcement-slide{display:none;opacity:0;transform:translateY(5px);transition:opacity .35s ease,transform .35s ease}.announcement-slide.active{display:block;opacity:1;transform:translateY(0)}.occasion-slide{position:absolute;top:0;right:0;left:0;width:100%;display:grid;opacity:0;visibility:hidden;transform:translateY(5px);transition:opacity .35s ease,transform .35s ease}.occasion-slide.active{opacity:1;visibility:visible;transform:translateY(0)}.announcement-stage .announcement-item{display:none}.announcement-stage .announcement-item.active{display:block}.announcement-progress,.occasion-progress{height:3px;border-radius:99px;background:#edf2f7;overflow:hidden;margin-top:9px}.announcement-progress span,.occasion-progress span{display:block;height:100%;width:0;background:#5b7fbd;transition:width linear}.announcement-item{padding:10px 11px;border:1px solid #eaecf0;border-radius:10px;background:#fafbfc}.announcement-item strong{display:block;color:#1d2939;font-size:10px}.announcement-item p{margin:4px 0 0;color:#667085;font-size:9px;line-height:1.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.announcement-meta{display:block;margin-top:5px;color:#98a2b3;font-size:8px}.announcement-empty{min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#98a2b3;gap:6px}.announcement-empty svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.announcement-empty strong{font-size:10px;color:#667085}.announcement-empty span{font-size:9px}.announcement-view{display:inline-flex;align-items:center;gap:5px;margin-top:9px;color:#3159a6;text-decoration:none;font-size:9px;font-weight:600}.announcement-view svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.7}.occasion-item{padding:10px 11px;border:1px solid #eaecf0;border-radius:10px;background:#fafbfc;display:grid;grid-template-columns:34px minmax(0,1fr);gap:9px;align-items:start}.occasion-icon{width:34px;height:34px;border-radius:9px;background:#fff4e5;color:#c47a13;display:flex;align-items:center;justify-content:center}.occasion-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.occasion-item strong{display:block;color:#1d2939;font-size:10px}.occasion-item p{margin:4px 0 0;color:#667085;font-size:9px;line-height:1.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.occasion-meta{display:block;margin-top:5px;color:#98a2b3;font-size:8px}.occasion-empty{min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#98a2b3;gap:6px}.occasion-empty svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.occasion-empty strong{font-size:10px;color:#667085}.occasion-empty span{font-size:9px}
 .error,.timeout{padding:10px 12px;border-radius:9px;margin-bottom:14px;font-size:10px;line-height:1.8}.error{background:#fef3f2;color:#b42318;border:1px solid #fecdca}.timeout{background:#fff7e6;color:#b54708;border:1px solid #fedf89;text-align:center}
@@ -281,6 +282,7 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 <?php endforeach; ?>
 </div>
 <div class="message-progress"><span id="messageProgress"></span></div>
+<div class="carousel-controls" aria-label="کنترل پیام همکاران"><button type="button" class="carousel-arrow" id="messagePrev" aria-label="پیام قبلی" title="پیام قبلی"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5-7 7 7 7"/></svg></button><span class="carousel-position" id="messagePosition" aria-live="polite"></span><button type="button" class="carousel-arrow" id="messageNext" aria-label="پیام بعدی" title="پیام بعدی"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 5 7 7-7 7"/></svg></button></div>
 <?php else: ?>
 <div class="message-empty">
 <svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.45A8.6 8.6 0 0 1 5.8 17L3 18l1-3.2A7.5 7.5 0 1 1 20 11.5Z"/></svg>
@@ -310,6 +312,7 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 <?php endforeach; ?>
 </div>
 <div class="announcement-progress"><span id="announcementProgress"></span></div>
+<div class="carousel-controls" aria-label="کنترل اطلاعیه‌های شرکت"><button type="button" class="carousel-arrow" id="announcementPrev" aria-label="اطلاعیه قبلی" title="اطلاعیه قبلی"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5-7 7 7 7"/></svg></button><span class="carousel-position" id="announcementPosition" aria-live="polite"></span><button type="button" class="carousel-arrow" id="announcementNext" aria-label="اطلاعیه بعدی" title="اطلاعیه بعدی"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 5 7 7-7 7"/></svg></button></div>
 <a href="/neal/announcements-list.php" class="announcement-view">مشاهده همه اطلاعیه‌ها <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
 <?php else: ?>
 <div class="announcement-empty">
@@ -343,6 +346,7 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 <?php endforeach; ?>
 </div>
 <div class="occasion-progress"><span id="occasionProgress"></span></div>
+<div class="carousel-controls" aria-label="کنترل مناسبت‌ها"><button type="button" class="carousel-arrow" id="occasionPrev" aria-label="مناسبت قبلی" title="مناسبت قبلی"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5-7 7 7 7"/></svg></button><span class="carousel-position" id="occasionPosition" aria-live="polite"></span><button type="button" class="carousel-arrow" id="occasionNext" aria-label="مناسبت بعدی" title="مناسبت بعدی"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 5 7 7-7 7"/></svg></button></div>
 <?php else: ?>
 <div class="occasion-empty">
 <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7v5l3 2"/></svg>
@@ -358,56 +362,83 @@ body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(circ
 
 <script>
 (function(){
-    var duration=60000;
+    var duration = 60000;
 
-    function setupCarousel(selector, progressId){
-        var items=[].slice.call(document.querySelectorAll(selector));
-        var progress=document.getElementById(progressId);
-        if(!items.length)return;
+    function setupCarousel(config) {
+        var items = Array.prototype.slice.call(document.querySelectorAll(config.selector));
+        var progress = document.getElementById(config.progressId);
+        var previous = document.getElementById(config.previousId);
+        var next = document.getElementById(config.nextId);
+        var position = document.getElementById(config.positionId);
+        if (!items.length) return;
 
-        var order=items.map(function(_,i){return i;});
-        var current=-1;
+        var current = 0;
+        var timer = null;
 
-        function shuffle(array){
-            for(var i=array.length-1;i>0;i--){
-                var j=Math.floor(Math.random()*(i+1));
-                var t=array[i];array[i]=array[j];array[j]=t;
-            }
-            return array;
-        }
-
-        function next(){
-            if(order.length===0){
-                order=items.map(function(_,i){return i;});
-                shuffle(order);
-                if(order.length>1 && order[0]===current){
-                    var t=order[0];order[0]=order[1];order[1]=t;
-                }
-            }
-
-            var nextIndex=order.shift();
-            items.forEach(function(item,i){
-                item.classList.toggle('active',i===nextIndex);
+        function show(index) {
+            current = (index + items.length) % items.length;
+            items.forEach(function(item, i) {
+                item.classList.toggle('active', i === current);
             });
-            current=nextIndex;
 
-            if(progress){
-                progress.style.transition='none';
-                progress.style.width='0%';
+            if (position) position.textContent = (current + 1) + ' از ' + items.length;
+            if (previous) previous.disabled = items.length < 2;
+            if (next) next.disabled = items.length < 2;
+
+            if (progress) {
+                progress.style.transition = 'none';
+                progress.style.width = '0%';
                 void progress.offsetWidth;
-                progress.style.transition='width '+duration+'ms linear';
-                progress.style.width='100%';
+                progress.style.transition = 'width ' + duration + 'ms linear';
+                progress.style.width = items.length > 1 ? '100%' : '0%';
             }
         }
 
-        order=shuffle(order);
-        next();
-        if(items.length>1)setInterval(next,duration);
+        function goTo(index) {
+            if (items.length < 2) return;
+            show(index);
+            if (timer !== null) window.clearInterval(timer);
+            timer = window.setInterval(function() {
+                show(current + 1);
+            }, duration);
+        }
+
+        if (previous) previous.addEventListener('click', function() {
+            goTo(current - 1);
+        });
+        if (next) next.addEventListener('click', function() {
+            goTo(current + 1);
+        });
+
+        show(0);
+        if (items.length > 1) {
+            timer = window.setInterval(function() {
+                show(current + 1);
+            }, duration);
+        }
     }
 
-    setupCarousel('.public-message','messageProgress');
-    setupCarousel('.announcement-slide','announcementProgress');
-    setupCarousel('.occasion-slide','occasionProgress');
+    setupCarousel({
+        selector: '.public-message',
+        progressId: 'messageProgress',
+        previousId: 'messagePrev',
+        nextId: 'messageNext',
+        positionId: 'messagePosition'
+    });
+    setupCarousel({
+        selector: '.announcement-slide',
+        progressId: 'announcementProgress',
+        previousId: 'announcementPrev',
+        nextId: 'announcementNext',
+        positionId: 'announcementPosition'
+    });
+    setupCarousel({
+        selector: '.occasion-slide',
+        progressId: 'occasionProgress',
+        previousId: 'occasionPrev',
+        nextId: 'occasionNext',
+        positionId: 'occasionPosition'
+    });
 })();
 </script>
 <script>
