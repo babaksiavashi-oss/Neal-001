@@ -4,12 +4,15 @@ declare(strict_types=1);
 require_once __DIR__ . '/auth/auth.php';
 require_once __DIR__ . '/includes/chat-common.php';
 
-if (!is_user_logged_in()) {
+$isAdmin = is_admin_logged_in();
+$isUser = is_user_logged_in();
+if (!$isAdmin && !$isUser) {
     http_response_code(401);
     exit('برای دریافت فایل ابتدا وارد حساب کاربری شوید.');
 }
 
-$myId = (int)($_SESSION['user_id'] ?? 0);
+// User IDs are positive; admin/IT IDs are negative, matching chat-api.php.
+$myId = $isAdmin ? -(int)($_SESSION['admin_id'] ?? 0) : (int)($_SESSION['user_id'] ?? 0);
 $attachmentId = (int)($_GET['id'] ?? 0);
 if ($myId <= 0 || $attachmentId <= 0) {
     http_response_code(400);
@@ -20,8 +23,13 @@ try {
     $db = neal_chat_db();
     neal_chat_cleanup_expired($db);
 
-    $userStmt = $db->prepare('SELECT id, is_active FROM users WHERE id=? LIMIT 1');
-    $userStmt->execute([$myId]);
+    if ($isAdmin) {
+        $userStmt = $db->prepare('SELECT id, is_active FROM admins WHERE id=? LIMIT 1');
+        $userStmt->execute([abs($myId)]);
+    } else {
+        $userStmt = $db->prepare('SELECT id, is_active FROM users WHERE id=? LIMIT 1');
+        $userStmt->execute([$myId]);
+    }
     $user = $userStmt->fetch();
     if (!$user || (int)$user['is_active'] !== 1) {
         http_response_code(403);
