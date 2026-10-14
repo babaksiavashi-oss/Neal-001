@@ -112,15 +112,18 @@ try {
     ")->fetchColumn();
 
     if ($tableExists) {
-        $stmt = $db->query("
+        // Use Tehran local time because announcement timestamps are stored as local time.
+        $localNow = (new DateTimeImmutable('now', new DateTimeZone('Asia/Tehran')))->format('Y-m-d H:i:s');
+        $stmt = $db->prepare("
             SELECT id, title, body, published_at, expires_at
             FROM announcements
             WHERE is_active = 1
-              AND (published_at IS NULL OR published_at <= CURRENT_TIMESTAMP)
-              AND (expires_at IS NULL OR expires_at = '' OR expires_at > CURRENT_TIMESTAMP)
+              AND (published_at IS NULL OR published_at <= :publish_now)
+              AND (expires_at IS NULL OR expires_at = '' OR expires_at > :expire_now)
             ORDER BY COALESCE(published_at, created_at) DESC, id DESC
             LIMIT 3
         ");
+        $stmt->execute([':publish_now' => $localNow, ':expire_now' => $localNow]);
         $announcements = $stmt->fetchAll();
     }
 } catch (Throwable $e) {
