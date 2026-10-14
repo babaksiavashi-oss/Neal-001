@@ -67,6 +67,7 @@ try {
 <a href="my-tickets.php">📋 درخواست‌های من<?php if($umcount>0): ?> (<?php echo $umcount; ?>)<?php endif; ?></a>
 <a href="quick-links-list.php">🔗 لینک‌های کاربردی</a>
 <a href="useful-files-list.php">📁 فایل‌های کاربردی</a>
+<a href="employee-directory.php">👥 دایرکتوری کارکنان</a>
 </div>
 </div>
 <div class="neal-user-group">
