@@ -54,7 +54,7 @@ try {
             neal_chat_json(['ok' => false, 'error' => 'همکار انتخاب‌شده معتبر نیست.'], 400);
         }
         if ($peerId < 0) {
-            $stmt = $db->prepare("SELECT id, username, fullname, role, is_active, 'default' AS avatar, '' AS user_status FROM admins WHERE id=? AND is_active=1 LIMIT 1");
+            $stmt = $db->prepare("SELECT id, username, username AS fullname, role, is_active, 'default' AS avatar, '' AS user_status FROM admins WHERE id=? AND is_active=1 LIMIT 1");
             $stmt->execute([abs($peerId)]);
             $peer = $stmt->fetch();
             if ($peer) {
