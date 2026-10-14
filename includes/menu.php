@@ -65,6 +65,7 @@ try {
 <div class="neal-nav-section">گزارش‌ها و خدمات</div>
 <a href="tickets.php">🎫 درخواست‌های خدمات</a>
 <a href="reports.php">📊 گزارش‌ها</a>
+<a href="it-performance-report.php">📈 گزارش کارکرد واحد انفورماتیک</a>
 <a href="blocked.php">🚫 لیست سایت‌های مسدود</a>
 </div>
 </div>
