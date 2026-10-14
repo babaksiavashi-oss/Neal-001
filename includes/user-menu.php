@@ -66,6 +66,7 @@ try {
 <a href="service-request.php">🛠 درخواست جدید</a>
 <a href="my-tickets.php">📋 درخواست‌های من<?php if($umcount>0): ?> (<?php echo $umcount; ?>)<?php endif; ?></a>
 <a href="quick-links-list.php">🔗 لینک‌های کاربردی</a>
+<a href="useful-files-list.php">📁 فایل‌های کاربردی</a>
 </div>
 </div>
 <div class="neal-user-group">
