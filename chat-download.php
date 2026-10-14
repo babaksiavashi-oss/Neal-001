@@ -14,7 +14,7 @@ if (!$isAdmin && !$isUser) {
 // User IDs are positive; admin/IT IDs are negative, matching chat-api.php.
 $myId = $isAdmin ? -(int)($_SESSION['admin_id'] ?? 0) : (int)($_SESSION['user_id'] ?? 0);
 $attachmentId = (int)($_GET['id'] ?? 0);
-if ($myId <= 0 || $attachmentId <= 0) {
+if ($myId === 0 || $attachmentId <= 0) {
     http_response_code(400);
     exit('درخواست دریافت فایل معتبر نیست.');
 }
