@@ -15,7 +15,7 @@ $myId = $isAdmin ? -(int)($_SESSION['admin_id'] ?? 0) : (int)($_SESSION['user_id
 $db = neal_chat_db();
 neal_chat_cleanup_expired($db);
 if ($isAdmin) {
-    $userStmt = $db->prepare('SELECT id, username, fullname, is_active FROM admins WHERE id=? LIMIT 1');
+    $userStmt = $db->prepare('SELECT id, username, username AS fullname, is_active FROM admins WHERE id=? LIMIT 1');
     $userStmt->execute([abs($myId)]);
 } else {
     $userStmt = $db->prepare('SELECT id, username, fullname, is_active FROM users WHERE id=? LIMIT 1');
