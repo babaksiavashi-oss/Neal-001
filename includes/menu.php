@@ -51,6 +51,7 @@ try {
 <div class="neal-nav-section">تنظیمات و مدیریت</div>
 <a href="users.php">👥 کاربران</a>
 <a href="quick-links.php">🔗 مدیریت لینک‌های کاربردی</a>
+<a href="useful-files.php">📁 مدیریت فایل‌های کاربردی</a>
 <a href="employee-directory.php">🧑‍🤝‍🧑 دایرکتوری کارکنان</a>
 <a href="settings.php">⚙️ تنظیمات</a>
 <a href="cache.php">⚡ کش</a>
