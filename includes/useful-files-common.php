@@ -33,7 +33,7 @@ function neal_useful_files_departments(PDO $db): array {
 }
 
 function neal_useful_files_dir(): string {
-    return dirname(dirname(__DIR__)) . '/neal-useful-files';
+    return dirname(dirname(dirname(__DIR__))) . '/neal-useful-files';
 }
 
 function neal_uf_h($value): string {
