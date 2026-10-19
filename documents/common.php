@@ -19,12 +19,13 @@ function neal_docs_db(): PDO
 
 function neal_docs_config(): array
 {
-    $path = '/usr/local/etc/neal-documents.php';
+    $path = '/usr/local/etc/neal-documents.env';
     if (!is_file($path) || !is_readable($path)) {
         throw new RuntimeException('تنظیمات امن سرویس اسناد نصب نشده است.');
     }
-    $config = require $path;
-    if (!is_array($config) || empty($config['storage_url']) || empty($config['storage_token'])) {
+    $values = parse_ini_file($path, false, INI_SCANNER_RAW);
+    $config = is_array($values) ? ['storage_url' => ($values['NEAL_STORAGE_URL'] ?? ''), 'storage_token' => ($values['NEAL_STORAGE_TOKEN'] ?? '')] : [];
+    if (empty($config['storage_url']) || empty($config['storage_token'])) {
         throw new RuntimeException('تنظیمات سرویس اسناد ناقص است.');
     }
     if (!function_exists('curl_init')) {
